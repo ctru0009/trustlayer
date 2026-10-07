@@ -1,0 +1,41 @@
+# Local development database: Postgres with the pgvector extension.
+#
+# Image choice: pgvector/pgvector:0.8.7-pg18-trixie is the official pgvector image,
+# so the extension ships without a custom Dockerfile. It is pinned to an exact
+# Postgres and pgvector version because the Phase 6 benchmark rows depend on
+# pgvector behaviour (HNSW under filtering, half-precision storage) that changes
+# between releases; "latest" would make old numbers unreproducible.
+#
+# Postgres 18 note: the data directory moved to /var/lib/postgresql/18/docker and
+# the image declares /var/lib/postgresql as its volume. Mounting the pre-18 path
+# (/var/lib/postgresql/data) leaves the volume unused and quietly loses all data
+# when the container is recreated, so the mount below is deliberate.
+#
+# Migrations are not mounted here. docker-entrypoint-initdb.d only runs on an empty
+# data directory, which is a poor fit for versioned migrations; Phase 4 applies
+# infra/db/migrations/*.sql with a real migration step.
+
+name: trustlayer
+
+services:
+  db:
+    image: pgvector/pgvector:0.8.7-pg18-trixie
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-trustlayer}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-trustlayer_local}
+      POSTGRES_DB: ${POSTGRES_DB:-trustlayer}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      # Liveness only: answers "can this server accept connections", says nothing
+      # about whether the schema or the extension is in place.
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  pgdata:
