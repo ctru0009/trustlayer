@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch makes an in-flight run obsolete.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Focused job: fast, unambiguous feedback on the Python stack alone.
+  python:
+    name: Python
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # uv version is pinned to match the developer machine; the lock file, not
+      # the resolver, is what makes installs reproducible.
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          version: "0.10.9"
+          enable-cache: true
+          cache-dependency-glob: python/uv.lock
+
+      # --locked fails if uv.lock and pyproject.toml disagree, so a dependency
+      # bump that forgot to re-lock breaks CI instead of drifting silently.
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Test
+        run: uv run pytest
+
+  # Focused job: fast, unambiguous feedback on the .NET stack alone.
+  dotnet:
+    name: .NET
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # global.json is the single source of truth for the SDK version.
+      - uses: actions/setup-dotnet@v6.0.0
+        with:
+          global-json-file: dotnet/global.json
+          cache: true
+          cache-dependency-path: dotnet/**/*.csproj
+
+      - name: Restore
+        run: dotnet restore dotnet/TrustLayer.sln
+
+      - name: Build
+        run: dotnet build dotnet/TrustLayer.sln --no-restore --configuration Release
+
+      - name: Check formatting
+        run: dotnet format dotnet/TrustLayer.sln --verify-no-changes --no-restore
+
+      - name: Test
+        run: dotnet test dotnet/TrustLayer.sln --no-build --configuration Release
+
+  # End-to-end job: runs exactly the commands a fresh clone is told to run, on a
+  # machine that has never seen this repository, then checks the database.
+  stack:
+    name: Fresh clone smoke test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          version: "0.10.9"
+
+      - uses: actions/setup-dotnet@v6.0.0
+        with:
+          global-json-file: dotnet/global.json
+
+      # Spec F10: a fresh clone must build and test through the Make targets.
+      - name: make setup && make test
+        run: make setup && make test
+
+      # `up` blocks on the health check, so this fails if Postgres never becomes
+      # healthy rather than passing on a container that is merely running.
+      - name: make up
+        run: make up
+
+      - name: Assert pgvector is available and loadable
+        run: |
+          set -euo pipefail
+          COMPOSE="docker compose --project-directory . -f infra/docker-compose.yml"
+          $COMPOSE exec -T db psql -U trustlayer -d trustlayer -v ON_ERROR_STOP=1 \
+            -c "CREATE EXTENSION IF NOT EXISTS vector;"
+          got="$($COMPOSE exec -T db psql -U trustlayer -d trustlayer -tAc \
+            "SELECT extversion FROM pg_extension WHERE extname = 'vector';" | tr -d '[:space:]')"
+          echo "pgvector extension version: '$got'"
+          if [ "$got" != "0.8.7" ]; then
+            echo "::error::expected pgvector 0.8.7 (the pinned version), got '$got'"
+            exit 1
+          fi
+
+      - name: Show container state
+        if: always()
+        run: docker compose --project-directory . -f infra/docker-compose.yml ps
+
+      - name: make down
+        if: always()
+        run: make down
