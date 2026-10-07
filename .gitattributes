@@ -1,0 +1,6 @@
+# Normalise line endings in the repository.
+* text=auto eol=lf
+
+# demo-video/ is isolated documentation (spec section 14): keep it out of the
+# repository's language statistics.
+demo-video/** linguist-documentation
