@@ -4,8 +4,6 @@ Two thin notebooks do the GPU-heavy Phase 7 work (~25–35 min total, mostly
 unattended). Everything else runs locally. Do the notebooks in either order —
 they are independent of each other.
 
-## What runs where (corrected)
-
 | Job | Where | Why |
 |---|---|---|
 | Re-encode (23k Classification vectors) | Colab T4 (`phase7a`) | ~12 min vs 1h+ local |
@@ -40,8 +38,10 @@ one row — here each method is its own row, device recorded in its config).
      re-downloading all 24 is simplest and harmless).
    - `trustlayer/embeddings-cls/embeddings-cls-stats.json` →
      `data/processed/embeddings-cls-stats.json`.
-7. Tell me it's landed — I run the sanity check (cls-vs-Document cosine on
-   100 rows, must be < 0.99) and then LR training locally.
+7. Tell me it's landed — I verify the downloaded chunks' `(doc_id,
+  chunk_ord)` key-set exactly equals the local corpus keys (count alone
+  can't catch a chunking mismatch), run the sanity check (cls-vs-Document
+  cosine on 100 rows, must be < 0.99), and then train LR locally.
 
 ## Notebook 2: DistilBERT (`notebooks/phase7b_distilbert.ipynb`)
 
