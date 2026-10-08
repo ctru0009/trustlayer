@@ -30,6 +30,12 @@ later corrects when the body has no substance. Card numbers must pass Luhn:
 without the checksum, any 16-digit run (ticket numbers, reference ids)
 would be a false positive; the gold set contains exactly such a case.
 
+- **Chunk-grain labels are deliberate.** Rules label each chunk from its own
+  text (+ shared title); a PII hit in one chunk does not propagate to
+  siblings. Doc-grain + broadcast was considered but rejected: Phase 5
+  retrieval filters per chunk, so labels must describe chunk content.
+  Sibling chunks of one doc can carry mixed labels — expected, not a bug.
+
 ## What label noise is, and how it inflates scores
 
 38.5% of weak labels disagreed with review. If those weak labels were used

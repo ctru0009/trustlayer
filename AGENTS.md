@@ -87,21 +87,40 @@ handles quoting — don't `cd` into subdirs for make targets):
 
 ```bash
 make setup   # uv sync + dotnet restore + install pre-commit hook
-make test    # pytest, then dotnet test (fails on first failing stack)
+make test    # pytest (+spark extra), then dotnet test (fails on first stack)
 make lint    # ruff check + ruff format --check + dotnet format verify (check-only)
 make up      # start Postgres, block on healthcheck
 make down    # stop it (volume survives; wipe with down --volumes)
+make prep    # Phase 2: raw AESLC → data/processed/corpus/ + stats
+make labels  # Phase 3: corpus → weak labels + gold sample + split manifests
 ```
 
-Per-stack equivalents: `cd python && uv run pytest`, `cd python && uv run ruff
-check .`, `dotnet test dotnet/TrustLayer.sln --nologo`. PySpark is NOT installed
-by setup; Phase 2 uses `cd python && uv sync --extra spark` (needs Java 17+;
-Homebrew's keg-only openjdk@21 requires an explicit `JAVA_HOME` — see
+Per-stack equivalents: `cd python && uv run --extra spark pytest`,
+`cd python && uv run ruff check . ../data/scripts`,
+`dotnet test dotnet/TrustLayer.sln --nologo`. Make targets self-add
+`--extra spark` — no separate sync step. Spark needs Java 17+ (Homebrew's
+keg-only openjdk@21 requires an explicit `JAVA_HOME` — see
 `docs/architecture.md`).
 
 ## Code Conventions & Common Patterns
 
-No domain patterns exist yet (scaffolding phase). What governs future code:
+Established patterns (prep/labels set the template for future phases):
+
+- **Pure-Python core, Spark shell**: text logic (`clean`, `chunk`, `rules`)
+  has no pyspark import — unit-testable without Java; Spark stages
+  (`dedupe`, `run`, `session`, `schema`) need the `spark` extra.
+- **Lazy spark imports**: package `__init__` exposes Spark entry points via
+  `__getattr__` so `import trustlayer.<phase>` works without pyspark (CI
+  syncs base env for lint; tests self-add the extra).
+- **UDF rules**: build inside functions (needs live session, never module
+  scope); `useArrow=False` (pandas/Arrow not installed, skips the probe
+  warning); explicit `DataType` instances for return types.
+- **Schema-drift checks**: every pipeline asserts written-Parquet schema
+  against its `*_SCHEMA` contract after write.
+- **Stats JSON beside output**: `<out>-stats.json` with row counts + seconds;
+  every lesson number traces to one.
+
+What governs future code:
 
 - **Python**: ruff, `target-version = "py312"`, `line-length = 88`. Rules:
   `E F I UP B SIM C4 PTH TID Q S D C901`; ignore `D203 D213` (conflict-pair
