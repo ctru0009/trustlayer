@@ -1,0 +1,33 @@
+name: Bug report
+description: Something behaves differently than the docs say it should
+labels: [bug]
+body:
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Commands run, starting from a clean state where possible
+      placeholder: |
+        1. make setup && make test
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed vs expected
+      description: What happened, and what the spec/lesson says should happen
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Commit
+      description: Short SHA you reproduced on
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Docker version, Java version, whether the DB was up

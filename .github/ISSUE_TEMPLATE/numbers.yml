@@ -1,0 +1,29 @@
+name: Numbers question
+description: A README number you cannot reproduce or want explained
+labels: [numbers]
+body:
+  - type: input
+    id: number
+    attributes:
+      label: The number
+      description: Quote it exactly as it appears in the README
+      placeholder: "O7 256d + halfvec: R@10 0.970"
+    validations:
+      required: true
+  - type: textarea
+    id: attempt
+    attributes:
+      label: What you ran
+      description: The exact command and what it produced instead
+      placeholder: |
+        make bench
+        ...
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Commit
+      description: Short SHA you ran on
+    validations:
+      required: true
