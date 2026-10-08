@@ -53,10 +53,10 @@ def test_search_returns_only_visible_hits() -> None:
     conn = psycopg.connect(DB_URL)
     try:
         with conn.cursor() as cur:
-            cur.execute("SELECT embedding FROM chunks LIMIT 1")
+            cur.execute("SELECT embedding::text FROM chunks LIMIT 1")
             row = cur.fetchone()
         assert row is not None
-        vec = list(row[0])
+        vec = [float(x) for x in row[0].strip("[]").split(",")]
         for user in USERS:
             hits = search(conn, vec, user, top_k=10)
             assert len(hits) <= 10
