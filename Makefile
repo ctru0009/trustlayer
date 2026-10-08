@@ -7,7 +7,7 @@
 
 COMPOSE := docker compose --project-directory . -f infra/docker-compose.yml
 
-.PHONY: setup test lint up down prep labels
+.PHONY: setup test lint up down prep labels embed
 
 # Install both stacks' dependencies and the pre-commit hook.
 # This installs the base Python env (no PySpark); `make test` and `make prep`
@@ -47,3 +47,8 @@ prep:
 # Needs Java 17+ for Spark. Gold review is a separate step afterwards.
 labels:
 	cd python && uv run --extra spark python -m trustlayer.labels.run --gold --splits
+
+# Phase 4 pipeline: corpus → embeddings + pgvector load. Needs the embed
+# extra (torch) and DATABASE_URL unless --skip-load is passed through.
+embed:
+	cd python && UV_LINK_MODE=copy uv run --extra embed --extra spark python -m trustlayer.embed.run

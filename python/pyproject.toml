@@ -15,6 +15,19 @@ dependencies = []
 # decision rather than an accident. Install with: uv sync --extra spark
 [project.optional-dependencies]
 spark = ["pyspark==4.1.3"]
+# Phase 4 pins the embedding stack: sentence-transformers (prompts, pooling,
+# norm), transformers (native embedding_gemma2, needs >=5.19), torch (MPS),
+# psycopg (pgvector load), pillow+numpy (image path). Install with:
+# uv sync --extra embed
+embed = [
+    "numpy==2.3.5",
+    "pillow==12.0.0",
+    "psycopg[binary]==3.3.2",
+    "sentence-transformers==6.1.0",
+    "torch==2.14.1",
+    "torchvision==0.29.1",
+    "transformers==5.19.0",
+]
 
 [dependency-groups]
 dev = [
