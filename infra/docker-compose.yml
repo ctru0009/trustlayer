@@ -17,6 +17,11 @@
 
 name: trustlayer
 
+# Phase 8: `db` is the default profile (make up/down). The `stack`
+# profile adds the model service + gateway (make stack); the service
+# carries torch (~2GB image, CPU-only) so it stays out of the default
+# path. Build contexts are the repo root (Dockerfiles copy per-stack
+# subdirs) because both images need files outside their own directory.
 services:
   db:
     image: pgvector/pgvector:0.8.7-pg18-trixie
@@ -37,5 +42,47 @@ services:
       retries: 10
       start_period: 10s
 
+  # Model service (internal): FastAPI over torch CPU. Not published to
+  # the host by default — the gateway reaches it as http://service:8000.
+  # Model + HF caches persist in a named volume so restarts don't
+  # re-download (~2GB of weights). HF_TOKEN is only needed for /answer
+  # (gated Gemma); /embed + /classify work without it.
+  service:
+    profiles: [stack]
+    build:
+      context: .
+      dockerfile: infra/dockerfiles/service.Dockerfile
+    environment:
+      HF_TOKEN: ${HF_TOKEN:-}
+      HF_HOME: /cache/hf
+      UV_CACHE_DIR: /cache/uv
+    volumes:
+      - modelcache:/cache
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Gateway (public): C# ASP.NET Core on :8080. Reads the DB directly
+  # (retrieval SQL) and calls the service for models. JWT secret comes
+  # from the environment; the dev default in .env.example is NOT for
+  # anything beyond local demo.
+  gateway:
+    profiles: [stack]
+    build:
+      context: .
+      dockerfile: infra/dockerfiles/gateway.Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      ConnectionStrings__TrustLayer: Host=db;Port=5432;Database=${POSTGRES_DB:-trustlayer};Username=${POSTGRES_USER:-trustlayer};Password=${POSTGRES_PASSWORD:-trustlayer_local}
+      ModelService__BaseUrl: http://service:8000
+      Jwt__Secret: ${JWT_SECRET:-dev-only-change-me}
+    depends_on:
+      db:
+        condition: service_healthy
+      service:
+        condition: service_healthy
+
 volumes:
   pgdata:
+  modelcache:

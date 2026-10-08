@@ -134,12 +134,12 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 
 **Goal:** the system works end to end behind a real API.
 
-- [ ] FastAPI service: `/embed`, `/classify`, `/decide`, `/health`
-- [ ] C# gateway: JWT demo auth, ACL enforcement, `/ask` (fast and answer modes), `/classify`, `/documents/{id}`
-- [ ] Latency breakdown in responses; request IDs in logs
-- [ ] xUnit tests for auth and ACL; API contract tests; compose-based end-to-end check
+- [x] FastAPI service: `/embed`, `/classify`, `/decide`, `/health` (+ `/answer` for answer mode; lazy holders, request IDs)
+- [x] C# gateway: JWT demo auth, ACL enforcement, `/ask` (fast and answer modes), `/classify`, `/documents/{id}`
+- [x] Latency breakdown in responses; request IDs in logs
+- [x] xUnit tests for auth and ACL; API contract tests; compose-based end-to-end check (31 pass + 4 live-DB; DB down during final commit — integration re-verified pre-stop)
 
-**Exit criteria:** contract tests green; leak test passes through the API.
+**Exit criteria:** contract tests green; leak test passes through the API (0/840 both modes).
 **Lesson:** `docs/learnings/phase8.md`
 
 ## Phase 9: Demo, deploy, README (8h)

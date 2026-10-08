@@ -208,6 +208,43 @@ BIO_LABEL_MAP: dict[str, str] = {
 }
 
 
+def train_final(
+    x_train: object, y_train: list[str], c: float, seed: int = SEED
+) -> object:
+    """Fit the final balanced multinomial LR at fixed C; return the classifier."""
+    from sklearn.linear_model import LogisticRegression
+
+    clf = LogisticRegression(
+        C=c,
+        class_weight="balanced",
+        solver="lbfgs",
+        max_iter=1000,
+        random_state=seed,
+    )
+    clf.fit(x_train, y_train)  # type: ignore[arg-type]
+    return clf
+
+
+def export_weights(clf: object) -> dict[str, object]:
+    """Export coef_/intercept_/classes_ as JSON-safe lists for the service."""
+    import numpy as np
+
+    from trustlayer.embed.config import DIM
+
+    coef = np.asarray(clf.coef_)  # type: ignore[attr-defined]
+    intercept = np.asarray(clf.intercept_)  # type: ignore[attr-defined]
+    classes = [str(cls) for cls in clf.classes_]  # type: ignore[attr-defined]
+    if coef.shape != (len(LABELS), DIM):
+        msg = f"expected coef {(len(LABELS), DIM)}, got {coef.shape}"
+        raise ValueError(msg)
+    order = [classes.index(name) for name in LABELS]
+    return {
+        "labels": list(LABELS),
+        "coef": coef[order].tolist(),
+        "intercept": intercept[order].tolist(),
+    }
+
+
 def pick_c(
     x_train: object, y_train: list[str], seed: int = SEED
 ) -> tuple[float, dict[float, float]]:
@@ -255,7 +292,6 @@ def _versions() -> dict[str, str]:
 def main(argv: list[str] | None = None) -> int:
     """CV-pick C on weak labels, train final LR, predict eval, write JSON."""
     import numpy as np
-    from sklearn.linear_model import LogisticRegression
 
     from trustlayer.embed.model import DIM, MODEL_ID, REVISION
 
@@ -270,6 +306,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--encode-device", default="mps")
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--seed", type=int, default=SEED)
+    parser.add_argument("--export-weights", type=Path, default=None)
     args = parser.parse_args(argv)
 
     method = args.method or (METHOD_PII if args.with_pii else METHOD_BASE)
@@ -320,14 +357,13 @@ def main(argv: list[str] | None = None) -> int:
     )
     print(f"best C={best_c}", flush=True)
 
-    clf = LogisticRegression(
-        C=best_c,
-        class_weight="balanced",
-        solver="lbfgs",
-        max_iter=1000,
-        random_state=args.seed,
-    )
-    clf.fit(x_train, y_list)
+    clf = train_final(x_train, y_list, best_c, seed=args.seed)
+
+    if args.export_weights is not None:
+        payload = {"C": best_c, "seed": args.seed, **export_weights(clf)}
+        args.export_weights.parent.mkdir(parents=True, exist_ok=True)
+        args.export_weights.write_text(json.dumps(payload) + "\n")
+        print(f"wrote {args.export_weights}", flush=True)
 
     eval_rows = _read_jsonl(args.eval)
     x_eval = np.asarray(

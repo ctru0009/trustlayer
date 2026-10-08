@@ -3,15 +3,20 @@
 Needs the ``embed`` extra.
 """
 
-from __future__ import annotations
-
 import torch
 from sentence_transformers import SentenceTransformer
 
-MODEL_ID = "google/embeddinggemma-2"
-REVISION = "914f7f89142e33e77833254d9c9b90c3cef7303b"
-DIM = 768
-MAX_LENGTH = 512
+from trustlayer.embed.config import DIM, MAX_LENGTH, MODEL_ID, REVISION
+
+__all__ = [
+    "DIM",
+    "MAX_LENGTH",
+    "MODEL_ID",
+    "REVISION",
+    "embed_texts",
+    "load_image_model",
+    "load_text_model",
+]
 
 
 def load_image_model(device: str = "cpu") -> SentenceTransformer:

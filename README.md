@@ -9,11 +9,12 @@ is the model, and how much is the plumbing around it — access control, evaluat
 
 ## Status
 
-Phase 7 of 11. The pipeline runs end to end: PySpark prep → weak labels →
-EmbeddingGemma-2 embeddings (23k text + 50 image vectors in pgvector) →
-permission-filtered search with a zero-violation leak test (0/69,160) →
-audited retrieval benchmark → classifier comparison below. No API or demo
-code yet.
+Phase 8 of 11. The pipeline runs end to end behind a real API: PySpark prep
+→ weak labels → EmbeddingGemma-2 embeddings (23k text + 50 image vectors in
+pgvector) → permission-filtered search with a zero-violation leak test
+(0/69,160 direct, 0/840 through the API) → audited retrieval benchmark →
+classifier comparison. FastAPI model service + C# gateway (`/ask` fast and
+answer modes). No demo or video yet.
 
 The plan, with exit criteria per phase, is in [`docs/roadmap.md`](docs/roadmap.md);
 the design is in [`docs/spec.md`](docs/spec.md); per-phase lessons (what I actually
@@ -70,6 +71,20 @@ rule-mimicry), so a flag means "human look", not "is confidential".
 
 Limits: 17 confidential positives (wide CIs); agent-reviewed gold;
 zero-shot wordings fixed a priori (no gold tuning).
+
+## API (Phase 8)
+
+FastAPI model service (port 8000, internal) + C# gateway (port 8080).
+Demo users `alice`/`bob`/`carol`/`admin`, no passwords. Ask fast mode
+returns cited passages; answer mode grounds a Gemma 3 1B answer in
+permitted passages only. Every `/ask` response carries a latency
+breakdown; leak test through the API: 0 violations over 840 hits.
+
+```bash
+make serve   # model service locally (uvicorn, CPU)
+# gateway: cd dotnet/src/TrustLayer.Gateway && dotnet run --urls http://localhost:8080
+make api-leak  # leak test through the API (needs stack + DATABASE_URL)
+```
 
 ## Getting started
 

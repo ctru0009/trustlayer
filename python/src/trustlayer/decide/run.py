@@ -235,6 +235,53 @@ def _parse_result(result: Any) -> tuple[str, dict[str, float]]:
     return pred, probs
 
 
+class LayaSession:
+    """One long-lived DecisionMaker + ChoiceQuestion (service use).
+
+    ``_run_model`` opens a maker per call — right for batch jobs that
+    report load/prewarm in their config, wrong for a request path. This
+    holds the maker open so ``/decide`` pays evaluate-only latency.
+    Use as a context manager; ``evaluate`` raises on any parse failure
+    (strict, like the comparison row).
+    """
+
+    def __init__(self, model_path: Path) -> None:
+        """Record the asset path; nothing loads until ``__enter__``."""
+        self.model_path = model_path
+        self._maker: Any = None
+        self._question: Any = None
+
+    def __enter__(self) -> LayaSession:
+        """Open the maker, prewarm the 3-way question, return self."""
+        from mediapipe.tasks.python.core import base_options
+        from mediapipe.tasks.python.decision import decision_maker
+
+        options = decision_maker.DecisionMakerOptions(
+            base_options=base_options.BaseOptions(
+                model_asset_path=str(self.model_path)
+            ),
+            max_num_tokens=MAX_NUM_TOKENS,
+        )
+        self._maker = decision_maker.DecisionMaker.create_from_options(options)
+        self._question, _ = _build_question(decision_maker)
+        self._maker.prewarm_choice(self._question)
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        """Close the maker (contextlib protocol; never suppresses)."""
+        if self._maker is not None:
+            self._maker.close()
+            self._maker = None
+            self._question = None
+
+    def evaluate(self, context: str) -> tuple[str, dict[str, float]]:
+        """Score one context; return (label, normalized probs)."""
+        if self._maker is None or self._question is None:
+            msg = "LayaSession used outside its context manager"
+            raise ValueError(msg)
+        return _parse_result(self._maker.evaluate_choice(context, self._question))
+
+
 def _run_model(
     model_path: Path, contexts: list[str], *, strict: bool
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:

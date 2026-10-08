@@ -4,11 +4,12 @@
 
 Trust Layer: a learning project building private on-device semantic search over
 documents and screenshots — ranked by meaning, sensitivity-labelled, and
-permission-aware (search must never leak restricted documents). Currently Phase 7
-of 11: prep, labels, embed, retrieve, bench, and classify pipelines exist with
-tests; pgvector holds 23k text + 50 image vectors with seeded ACLs and an HNSW
-index. README carries the audited retrieval table (O7 ships) and the classifier
-comparison (LR ships). No API code yet.
+permission-aware (search must never leak restricted documents). Currently Phase 8
+of 11: offline pipelines (prep, labels, embed, retrieve, bench, classify) plus
+a FastAPI model service and a C# gateway with JWT auth and ACL enforcement;
+pgvector holds 23k text + 50 image vectors with seeded ACLs and an HNSW index.
+README carries the retrieval table (O7 ships), the classifier comparison (LR
+ships), and the API section (0/840 leak test through the API). No demo yet.
 Author is learning ML/big data; the core question is how much is model vs
 plumbing (access control, evaluation, data handling).
 
@@ -60,14 +61,16 @@ exists.
 
 ## Key Directories
 
-- `python/src/trustlayer/` — `prep/` (Phase 2: clean/chunk pure-Python,
-  dedupe/run/session/schema Spark; `make prep`), `labels/` (Phase 3:
-  rules pure-Python, run/schema Spark; `make labels`). `embed`, `classify`,
-  `decide`, `bench`, `service` arrive in later phases.
-- `dotnet/src/TrustLayer.Gateway/` — C# gateway (currently stock minimal-API
-  `Program.cs`, `GET /` → "Hello World!"; real endpoints in Phase 8).
-- `python/tests/` — prep + labels suites (unit + Spark e2e); `dotnet/tests/` —
-  one xUnit placeholder (see Testing).
+- `python/src/trustlayer/` — `prep/` (Phase 2), `labels/` (Phase 3), `embed/`
+  (Phase 4), `retrieve/` (Phase 5: acl/search/seed/leak), `bench/` (Phase 6),
+  `classify/` + `decide/` (Phase 7), `service/` (Phase 8: FastAPI app, lazy
+  holders, committed `lr-weights.json`, API leak test).
+- `dotnet/src/TrustLayer.Gateway/` — C# gateway (Phase 8: `Auth/`, `Models/`,
+  `Services/` + minimal-API `Program.cs`; JWT demo auth, ACL port, retrieval
+  SQL port, `/ask` fast+answer, `/classify`, `/documents/{id}`).
+- `python/tests/` — unit + Spark e2e + service contract tests;
+  `dotnet/tests/` — xUnit ACL/auth/contract tests + DB-gated integration
+  (`RequiresTestDbFact`, needs `TRUSTLAYER_TEST_DB`).
 - `data/` — git-ignored; `SOURCES.md` (dataset registry), `scripts/` (download
   scripts), and `gold/splits/*.txt` (doc_id manifests, content hashes) are
   committed. Never commit raw data or gold content (embeds chunk text).
@@ -107,6 +110,9 @@ make classify-bert # Phase 7: DistilBERT (local) — Colab 7b is faster
 make classify-llm  # Phase 7: Gemma zero-shot (needs HF token + license)
 make decide        # Phase 7: Laya row + GLiNER probe
 make classify-eval # Phase 7: comparison table + reliability JSON
+make serve         # Phase 8: model service locally (uvicorn :8000)
+make stack         # Phase 8: db + service + gateway via compose (:8080)
+make api-leak      # Phase 8: leak test through the API (stack + DATABASE_URL)
 ```
 
 Per-stack equivalents: `cd python && uv run --extra spark pytest`,
@@ -204,16 +210,16 @@ Pinned toolchain — never bump without recording the decision:
 - **Python**: pytest 9.1.1, `testpaths = ["tests"]`, no markers/conftest.
   `python/tests/test_package.py` asserts install correctness (module version ==
   dist metadata; resolves to `src/trustlayer`) — deliberately not `assert True`.
-- **.NET**: xUnit 2.9.3. `GatewaySmokeTests.cs` asserts the gateway assembly
-  resolves and has an entry point — deliberately not an empty `[Fact]`; Phase 8
-  replaces it with auth/ACL tests.
+- **.NET**: xUnit 2.9.3. `AclTests` (truth table), `GatewayContractTests`
+  (WebApplicationFactory + fakes), `DocumentStoreTests` (live Postgres,
+  gated on `TRUSTLAYER_TEST_DB` via `RequiresTestDbFact` — v2 has no
+  `Assert.Skip`). The Phase 1 smoke test stays (assembly/entry-point).
 - Adding tests: Python files `python/tests/test_*.py`, plain `assert`,
   `-> None` annotations; .NET classes in `TrustLayer.Gateway.Tests`, `[Fact]`/
-  `[Theory]`, must satisfy nullable + analyzers (except CA1707). Extend the
-  placeholders; don't delete until real tests subsume their assertions.
+  `[Theory]`, must satisfy nullable + analyzers (except CA1707).
 - No coverage gate anywhere (coverlet referenced but uninvoked; no
   pytest-cov). Adding coverage tooling is new scope, not restoration.
 - Pre-commit hook runs lint/format only (~5s budget) — tests are CI's job.
-- Future gates (spec §12): leak test (every user × every eval query, both
-  modes, zero violations), kill-and-resume embedding test, compose-based e2e on
-  a tiny fixture.
+- Gates (spec §12): direct leak test (`make leak`, 0/69,160), API leak
+  test (`make api-leak`, 0/840, both modes), kill-and-resume embedding
+  test (Phase 4). No compose e2e in CI (torch image cost — local only).

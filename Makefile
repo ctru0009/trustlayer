@@ -7,7 +7,7 @@
 
 COMPOSE := docker compose --project-directory . -f infra/docker-compose.yml
 
-.PHONY: setup test lint up down prep labels embed embed-images seed-acls leak bench-freeze bench classify-data classify-lr classify-bert classify-llm decide classify-eval
+.PHONY: setup test lint up down prep labels embed embed-images seed-acls leak bench-freeze bench classify-data classify-lr classify-bert classify-llm decide classify-eval serve stack api-leak
 # Install both stacks' dependencies and the pre-commit hook.
 # This installs the base Python env (no PySpark); `make test` and `make prep`
 # add `--extra spark` themselves, so no separate sync step is needed.
@@ -98,3 +98,18 @@ decide:
 # Phase 7: score all rows, write comparison.json + reliability.json, print table.
 classify-eval:
 	cd python && UV_LINK_MODE=copy uv run python -m trustlayer.classify.eval
+
+# Phase 8: run the model service locally (uvicorn, CPU; add --reload to taste).
+# Needs embed (+classify for /decide); the gateway points at this via MODEL_SERVICE_URL.
+serve:
+	cd python && UV_LINK_MODE=copy uv run --extra service --extra embed --extra classify uvicorn trustlayer.service.app:app --port 8000
+
+# Phase 8: full stack (db + service + gateway) via compose. Gateway on :8080.
+stack:
+	$(COMPOSE) --profile stack up --detach --wait
+	$(COMPOSE) ps
+
+# Phase 8: leak test through the gateway API (both ask modes, zero violations).
+# Needs the stack up plus DATABASE_URL for expected-visibility checks.
+api-leak:
+	cd python && UV_LINK_MODE=copy uv run --extra service python -m trustlayer.service.api_leak

@@ -36,6 +36,15 @@ classify = [
     "mediapipe==1.1.0",
     "scikit-learn==1.9.1",
 ]
+# Phase 8 pins the model-service stack: FastAPI + uvicorn serve
+# trustlayer.service (embed/classify/decide/answer); httpx is the test
+# client transport. Model weights come from the embed/classify extras.
+# Install with: uv sync --extra service
+service = [
+    "fastapi==0.142.4",
+    "httpx==0.28.1",
+    "uvicorn==0.54.0",
+]
 
 [dependency-groups]
 dev = [
