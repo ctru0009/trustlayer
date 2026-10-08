@@ -7,7 +7,7 @@
 
 COMPOSE := docker compose --project-directory . -f infra/docker-compose.yml
 
-.PHONY: setup test lint up down prep labels embed
+.PHONY: setup test lint up down prep labels embed embed-images
 
 # Install both stacks' dependencies and the pre-commit hook.
 # This installs the base Python env (no PySpark); `make test` and `make prep`
@@ -52,3 +52,8 @@ labels:
 # extra (torch) and DATABASE_URL unless --skip-load is passed through.
 embed:
 	cd python && UV_LINK_MODE=copy uv run --extra embed --extra spark python -m trustlayer.embed.run
+
+# Phase 4 image path: FUNSD forms → embeddings-images/ → pgvector.
+# CPU default (50 forms, ~3 min); needs DATABASE_URL unless --skip-load.
+embed-images:
+	cd python && UV_LINK_MODE=copy uv run --extra embed --extra spark python -m trustlayer.embed.run --images ../data/raw/funsd/test-00000-of-00001.parquet --device cpu --batch-size 8

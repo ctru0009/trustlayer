@@ -81,7 +81,7 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 - [x] Pin model revision (`914f7f8`) and record it in the lesson
 - [x] Prefix handling (Document prompt via `encode_document`, no double-prefix), normalisation, dimension handling (768d)
 - [x] Finite and dimension checks per batch; chunked output; resume after interruption (proven: local kill at 5/24, Colab redid all)
-- [x] Text+image encoder path; image subset embedded (FUNSD 50, single-image CPU proof; batch-50 deferred)
+- [x] Text+image encoder path; image subset embedded (FUNSD 50, CPU batch, indexed `modality='image'`, cross-modal verified)
 - [x] Thin Colab notebook that clones the repo and runs the module; saves to Drive per chunk (proven: 726s T4 run)
 - [x] Time 1,000 documents and extrapolate before any full run (71.2s MPS → ~28 min predicted)
 - [x] Load embeddings into pgvector (23,267 vectors, 15.3s; UPDATE...FROM after the upsert lesson)
