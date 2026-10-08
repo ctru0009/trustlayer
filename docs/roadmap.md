@@ -159,9 +159,9 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 
 **Goal:** a 90-second walkthrough.
 
-- [ ] Script: ask a question, see a cited answer, see a sensitive item flagged, see a permission block
-- [ ] Build with fframes in `demo-video/` (isolated). If setup exceeds about 2 hours, fall back to a screen recording
-- [ ] Export screenshots or GIF frames for the README
+- [x] Script: ask a question, see a cited answer, see a sensitive item flagged, see a permission block (`demo-video/SCRIPT.md`, all four beats in the video)
+- [x] Build with fframes in `demo-video/` (isolated). If setup exceeds about 2 hours, fall back to a screen recording — fell back: fframes is a code-first motion-graphics framework (Rust+SVG), wrong tool for a UI walkthrough; no Rust toolchain installed. `agent-browser record` + ffmpeg assembly instead
+- [x] Export screenshots or GIF frames for the README (`demo.gif` preview + mp4 link)
 
 **Exit criteria:** video embedded or linked in the README.
 **Lesson:** `docs/learnings/phase10.md`

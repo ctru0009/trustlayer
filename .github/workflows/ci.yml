@@ -46,9 +46,9 @@ jobs:
         run: uv sync --locked --extra spark
 
       - name: Lint
-        run: uv run ruff check . ../data/scripts
+        run: uv run ruff check . ../data/scripts ../demo
       - name: Check formatting
-        run: uv run ruff format --check . ../data/scripts
+        run: uv run ruff format --check . ../data/scripts ../demo
 
       - name: Test
         run: uv run --extra spark pytest

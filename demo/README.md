@@ -21,4 +21,7 @@ and return markdown, so they are testable without a browser:
 `TRUSTLAYER_GATEWAY=http://host:8080 make demo`.
 
 Screenshots in `docs/demo-*.png` are real captures from this app against
-the local stack.
+the local stack, recorded with redaction on:
+`TRUSTLAYER_REDACT_SNIPPETS=1 make demo` hides snippets, generated
+answers, and document bodies (Enron is real people's email — no
+individual message in any committed artifact, per `data/SOURCES.md`).

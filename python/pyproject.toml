@@ -46,10 +46,11 @@ service = [
     "uvicorn==0.54.0",
 ]
 # Phase 9 pins the demo stack: Gradio thin client over the gateway.
-# httpx comes from the service extra (make demo adds both).
+# httpx is a direct import in demo/app.py, pinned to match service.
 # Install with: uv sync --extra demo
 demo = [
     "gradio==6.29.1",
+    "httpx==0.28.1",
 ]
 
 [dependency-groups]

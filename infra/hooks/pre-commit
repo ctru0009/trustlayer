@@ -13,8 +13,8 @@ done
 
 root="$(git rev-parse --show-toplevel)"
 cd "$root/python"
-uv run ruff check . ../data/scripts
-uv run ruff format --check . ../data/scripts
+uv run ruff check . ../data/scripts ../demo
+uv run ruff format --check . ../data/scripts ../demo
 
 cd "$root"
 dotnet format dotnet/TrustLayer.sln --verify-no-changes

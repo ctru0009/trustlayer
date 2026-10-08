@@ -24,6 +24,10 @@ GATEWAY = os.environ.get("TRUSTLAYER_GATEWAY", "http://localhost:8080")
 USERS = ["alice", "bob", "carol", "admin"]
 TIMEOUT = 30.0
 ANSWER_TIMEOUT = 600.0
+# Enron is real people's email (SOURCES.md: no individual message in any
+# demo, screenshot, or fixture). Recorded artifacts are made with this on:
+# hits keep title/score/label/modality/doc_id, document bodies are hidden.
+REDACT = os.environ.get("TRUSTLAYER_REDACT_SNIPPETS") == "1"
 
 
 def _post(
@@ -58,22 +62,28 @@ def _render_hits(body: dict[str, Any]) -> str:
     parts = []
     results = body.get("results", [])
     if body.get("answer"):
-        parts.append(f"### Answer\n\n{html.escape(str(body['answer']))}\n")
+        if REDACT:
+            parts.append("### Answer\n\n_answer redacted for the recorded demo._\n")
+        else:
+            parts.append(f"### Answer\n\n{html.escape(str(body['answer']))}\n")
         titles = (str(c.get("title", "")) for c in body.get("citations", []))
         cites = [f"- {html.escape(t)}" for t in titles]
         parts.append("\n".join(cites) + "\n" if cites else "")
     elif not results:
         parts.append("_No visible results._\n")
     for hit in results:
-        raw = html.escape(str(hit.get("snippet", ""))[:600]).replace("\n", "\n> ")
         parts.append(
             f"### {html.escape(str(hit.get('title', '(untitled)')))}\n\n"
             f"score {hit.get('score', 0):.3f} · "
             f"`{html.escape(str(hit.get('label', '')))}` · "
             f"{html.escape(str(hit.get('modality', '')))} · "
-            f"`{html.escape(str(hit.get('doc_id', '')))}`\n\n"
-            f"> {raw}\n"
+            f"`{html.escape(str(hit.get('doc_id', '')))}`\n"
         )
+        if REDACT:
+            parts.append("_snippet redacted for the recorded demo._\n")
+        else:
+            raw = html.escape(str(hit.get("snippet", ""))[:600]).replace("\n", "\n> ")
+            parts.append(f"> {raw}\n")
     lat = body.get("latency_ms", {})
     parts.append(
         f"\n---\n_latency ms: embed {lat.get('embed', 0):.0f} · "
@@ -143,14 +153,18 @@ def fetch(token: str, doc_id: str) -> str:
     if resp.status_code != 200:
         return f"❌ /documents → {resp.status_code}: {html.escape(resp.text[:300])}"
     body = resp.json()
-    texts = (str(c.get("text", ""))[:2000] for c in body.get("chunks", []))
-    chunks = "\n\n---\n\n".join(html.escape(t) for t in texts)
-    return (
+    header = (
         f"### {html.escape(str(body.get('title', '')))}\n\n"
         f"`{html.escape(str(body.get('label', '')))}` · "
         f"{html.escape(str(body.get('modality', '')))} · "
-        f"{html.escape(str(body.get('lang', '')))}\n\n{chunks}"
+        f"{html.escape(str(body.get('lang', '')))}"
     )
+    if REDACT:
+        n = len(body.get("chunks", []))
+        return f"{header}\n\n_{n} chunk(s) hidden for the recorded demo._"
+    texts = (str(c.get("text", ""))[:2000] for c in body.get("chunks", []))
+    chunks = "\n\n---\n\n".join(html.escape(t) for t in texts)
+    return f"{header}\n\n{chunks}"
 
 
 def build() -> gr.Blocks:

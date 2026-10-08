@@ -29,9 +29,12 @@ carry the demo.
   as future). Classify screenshot kept in `docs/` for the Phase 10 video.
 - **Screenshots are captures, not mockups**: driven through a real
   browser against the local stack (login → search → classify → carol
-  fetches confidential doc → 404). Query text is synthetic; result
-  snippets are Enron-derived, consistent with the no-individual-messages
-  rule (titles/scores only in prose, snippets only inside the UI frame).
+  fetches confidential doc → 404). No Enron body text appears anywhere
+  committed: `TRUSTLAYER_REDACT_SNIPPETS=1` hides snippets/bodies behind
+  a redaction notice for all recorded artifacts (titles, scores, labels,
+  doc_ids only). The first cut wrongly allowed snippets "inside the UI
+  frame" — a committed screenshot of the UI is still a screenshot, so
+  that cut was re-recorded and replaced before release.
 
 ## Findings
 
