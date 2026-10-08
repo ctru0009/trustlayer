@@ -31,14 +31,14 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 
 **Goal:** a fresh clone builds, tests and starts the database with two commands.
 
-- [ ] Repo skeleton per `spec.md` section 14; licence; `.gitignore`; `.editorconfig`; `.env.example`
-- [ ] Python project (pinned versions), lint and test tooling, one passing placeholder test
-- [ ] .NET solution with a gateway project and a test project, one passing placeholder test
-- [ ] `docker-compose.yml` with Postgres + pgvector and a health check; migration folder
-- [ ] `Makefile` targets: `setup`, `test`, `lint`, `up`, `down`
-- [ ] GitHub Actions: build and test both stacks
-- [ ] `data/SOURCES.md` and `LEARNING.md` stubs
-- [ ] Verify Java version compatible with the pinned PySpark
+- [x] Repo skeleton per `spec.md` section 14; licence; `.gitignore`; `.editorconfig`; `.env.example`
+- [x] Python project (pinned versions), lint and test tooling, one passing placeholder test
+- [x] .NET solution with a gateway project and a test project, one passing placeholder test
+- [x] `docker-compose.yml` with Postgres + pgvector and a health check; migration folder
+- [x] `Makefile` targets: `setup`, `test`, `lint`, `up`, `down`
+- [x] GitHub Actions: build and test both stacks
+- [x] `data/SOURCES.md` and `LEARNING.md` stubs
+- [x] Verify Java version compatible with the pinned PySpark
 
 **Exit criteria:** `make setup && make test` green locally and in CI; `make up` shows a healthy database.
 **Checkpoint:** why pin versions? What does a health check give you? What would break on a different machine?
