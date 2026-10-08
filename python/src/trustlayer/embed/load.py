@@ -10,32 +10,24 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-SCHEMA_SQL = """\
-CREATE EXTENSION IF NOT EXISTS vector;
-CREATE TABLE IF NOT EXISTS documents (
-    id TEXT PRIMARY KEY,
-    source TEXT NOT NULL DEFAULT 'aeslc',
-    title TEXT NOT NULL,
-    modality TEXT NOT NULL DEFAULT 'text',
-    lang TEXT NOT NULL DEFAULT 'en',
-    thread_id TEXT NOT NULL,
-    label TEXT NOT NULL,
-    allowed_roles TEXT[] NOT NULL DEFAULT '{}'
-);
-CREATE TABLE IF NOT EXISTS chunks (
-    id TEXT PRIMARY KEY,
-    doc_id TEXT NOT NULL REFERENCES documents (id),
-    ord INT NOT NULL,
-    text TEXT NOT NULL,
-    embedding vector(768)
-);
-"""
+MIGRATION = (
+    Path(__file__).resolve().parents[4]
+    / "infra"
+    / "db"
+    / "migrations"
+    / "001_pgvector_schema.sql"
+)
+
+
+def schema_sql() -> str:
+    """Read the versioned schema (migration 001 is the source of truth)."""
+    return MIGRATION.read_text()
 
 
 def ensure_schema(conn: object) -> None:
     """Create extension + tables if missing (idempotent)."""
     with conn.cursor() as cur:  # type: ignore[attr-defined]
-        cur.execute(SCHEMA_SQL)
+        cur.execute(schema_sql())
     conn.commit()  # type: ignore[attr-defined]
 
 

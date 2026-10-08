@@ -14,6 +14,25 @@ DIM = 768
 MAX_LENGTH = 512
 
 
+def load_image_model(device: str = "cpu") -> SentenceTransformer:
+    """Load the text+image encoder in float32 with eager attention.
+
+    Args:
+        device: ``cpu`` default — the image subset is 50 forms, and the
+            text-run MPS stall showed long unattended MPS runs are risky.
+
+    Audio tower nulled (Phase 11); vision tower kept (~440M params total).
+
+    """
+    return SentenceTransformer(
+        MODEL_ID,
+        revision=REVISION,
+        device=device,
+        config_kwargs={"audio_config": None},
+        model_kwargs={"torch_dtype": torch.float32, "attn_implementation": "eager"},
+    )
+
+
 def load_text_model(device: str = "mps") -> SentenceTransformer:
     """Load the text-only encoder in float32 with eager attention.
 
