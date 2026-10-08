@@ -8,18 +8,15 @@ texts from the test split, relevance = source document.
 
 9 configs on the same 300 queries, exact protocol per spec §10
 (warm-up + 5 repeats, bootstrap CIs, config logged per run):
-
-| Config | R@10 | MRR | nDCG | p50 | Size |
-|---|---|---|---|---|---|
 | baseline (768d fp32 exact) | 0.977 | 0.911 | 0.927 | 31ms | 100MB |
 | O1 512d | 0.977 | 0.911 | 0.927 | 29ms | 69MB |
 | O2 256d | 0.973 | 0.895 | 0.914 | 5.5ms | 29MB |
 | O3 128d | 0.940 | 0.860 | 0.880 | 4.4ms | 16MB |
-| O5 HNSW | 0.977 | 0.911 | 0.927 | 34ms | 193MB |
+| O5 HNSW (ef_search=40) | 0.900 | 0.838 | 0.854 | 2.1ms | 193MB |
 | O6 halfvec | 0.977 | 0.911 | 0.928 | 7.5ms | 40MB |
 | O7 256d+halfvec | 0.970 | 0.894 | 0.913 | 4.5ms | 16MB |
 | ablate no-renorm | 0.973 | 0.895 | 0.914 | 5.5ms | 29MB |
-| ablate no-prefix | 0.963 | 0.886 | 0.905 | 36ms | 100MB |
+| ablate query-mismatch | 0.963 | 0.886 | 0.905 | 37ms | 100MB |
 
 Cross-lingual (500-article VI Wikipedia sample): EN→VI R 1.0 / MRR
 0.954 (30 hand-written queries); VI→VI R 1.0 / MRR 0.985 (100 title
@@ -31,10 +28,15 @@ queries). Same recall, slightly worse cross-lingual ranking.
   128d −0.037 recall. EmbeddingGemma's Matryoshka-style training shows.
 - **Halfvec is quality-neutral** (MRR +0.0005, noise) at 60% smaller
   and 4× faster. The single best optimization.
-- **HNSW loses at 23k rows**: same recall (strict_order), but slower
-  than exact (34 vs 31ms) and 2× the size. Index overhead dominates;
-  HNSW pays off at scale, not here. Honest row, kept.
-- **No-prefix costs −0.014 recall** — real but smaller than feared.
+- **HNSW trades recall for speed**: R 0.900 (−0.077) at 2.1ms (15×
+  faster than exact) with default ef_search=40. A genuine quality /
+  latency knob — a higher ef_search would recover recall (unprobed).
+  First published O5 row was invalid (shared-connection SET bug measured
+  a seq scan); corrected with EXPLAIN proof. O7 excludes HNSW on the
+  quality bar, not on speed.
+- **Query-mismatch costs −0.014 recall** — unprompted queries against
+  prompted docs. Smaller than the cos-0.89 region shift suggested; a
+  true no-prefix ablation needs corpus re-encode (unscored).
 - **No-renorm is vacuous for pgvector cosine**: identical to O2 down
   to the 4th decimal. The `<=>` operator normalizes internally, so
   un-renormalized vectors score the same. Renorm matters for
@@ -81,5 +83,8 @@ is EN→VI vs VI→VI, not symmetric.
 - `uv run --with matplotlib` for one-off plots: no dependency to pin.
 - Download scripts: `Path(__file__).parents[2]` from `data/scripts/`,
   not `[3]` — off-by-one wrote 600MB outside the repo (caught, moved).
+- `SET` persists on a shared connection across benchmark rows — an
+  `enable_indexscan=off` from an exact row silently turned the HNSW row
+  into a seq scan. Set (and EXPLAIN-verify) per-row planner state.
 
 Spec pointers: §10, F8.

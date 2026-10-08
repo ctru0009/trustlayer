@@ -31,10 +31,10 @@ provenance per run in `data/bench/results/`; method in
 | O1 512d | 0.977 | 0.911 | 29ms | 69MB |
 | O2 256d | 0.973 | 0.895 | 5.5ms | 29MB |
 | O3 128d | 0.940 | 0.860 | 4.4ms | 16MB |
-| O5 HNSW | 0.977 | 0.911 | 34ms | 193MB |
+| O5 HNSW (ef_search=40) | 0.900 | 0.838 | 2.1ms | 193MB |
 | O6 halfvec | 0.977 | 0.911 | 7.5ms | 40MB |
 | **O7 256d + halfvec (ship this)** | **0.970** | **0.894** | **4.5ms** | **16MB** |
-| no-prefix ablation | 0.963 | 0.886 | 36ms | 100MB |
+| query-mismatch ablation | 0.963 | 0.886 | 37ms | 100MB |
 
 Cross-lingual (500-article Vietnamese Wikipedia sample): EN→VI MRR 0.954,
 VI→VI MRR 0.985 — same recall, slightly worse cross-lingual ranking.

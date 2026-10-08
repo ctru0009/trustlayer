@@ -27,7 +27,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     ds = load_dataset(
-        "wikimedia/wikipedia", "20231101.vi", split="train", streaming=True
+        "wikimedia/wikipedia",
+        "20231101.vi",
+        split="train",
+        streaming=True,
+        revision="b04c8d1ceb2f5cd4588862100d08de323dccfbaa",
     )
     titles: list[str] = []
     texts: list[str] = []

@@ -52,10 +52,14 @@ CONFIGS: list[RunConfig] = [
     RunConfig("O5-hnsw", index="hnsw"),
     RunConfig("O6-halfvec", storage="halfvec"),
     RunConfig("ablate-no-renorm", dim=256, renorm=False),
-    RunConfig("ablate-no-prefix", prefix=False),
+    # Query-side only: docs stay Document-prompted, so this measures
+    # prompt-mismatch (unprompted queries vs prompted docs), not a true
+    # no-prefix ablation. True ablation needs corpus re-encode; unscored.
+    RunConfig("ablate-query-mismatch", prefix=False),
     # O7: measured best combo — 256d (O2: -0.003 recall) + halfvec (O6:
-    # quality-neutral, 60% smaller). HNSW excluded: slower than exact at
-    # 23k rows (O5 row), pays off only at larger scale.
+    # quality-neutral, 60% smaller). HNSW excluded: 15x faster but -0.077
+    # recall at ef_search=40 (O5 row) — fails this quality bar; a higher
+    # ef_search might change the tradeoff (unprobed).
     RunConfig("O7-best", dim=256, storage="halfvec"),
 ]
 
@@ -132,6 +136,10 @@ def run_queries(
     lat: list[float] = []
     with conn.cursor() as cur:  # type: ignore[attr-defined]
         if cfg.index == "hnsw":
+            # The connection is shared across configs; earlier exact rows
+            # SET enable_indexscan=off, which persists. Re-enable here or
+            # this row silently measures a seq scan, not HNSW.
+            cur.execute("SET enable_indexscan = on")
             cur.execute("SET hnsw.iterative_scan = 'strict_order'")
         else:
             cur.execute("SET enable_indexscan = off")

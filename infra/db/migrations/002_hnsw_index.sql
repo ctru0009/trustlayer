@@ -3,10 +3,9 @@
 -- m=16, ef_construction=64 are pgvector's recommended starting values.
 -- Filtered HNSW (WHERE + ORDER BY <=> LIMIT) can return fewer than LIMIT
 -- rows: the graph walk visits ef_search candidates, and the filter applies
--- after the walk. In pgvector 0.8.7 the fix is hnsw.iterative_scan =
 -- 'strict_order' (enum: off | relaxed_order | strict_order, default off),
--- or a higher hnsw.ef_search. Probed in the Phase 5 lesson: no shortfall
--- at 23k rows even under a 2%-selective filter.
+-- or a higher hnsw.ef_search. Phase 5 lesson: 1 shortfall in 6,916 leak
+-- queries (carol/q553, 7/10) — strict_order ships in `search()` itself.
 CREATE INDEX IF NOT EXISTS chunks_embedding_hnsw
     ON chunks USING hnsw (embedding vector_cosine_ops)
     WITH (m = 16, ef_construction = 64);
