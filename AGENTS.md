@@ -4,10 +4,11 @@
 
 Trust Layer: a learning project building private on-device semantic search over
 documents and screenshots — ranked by meaning, sensitivity-labelled, and
-permission-aware (search must never leak restricted documents). Currently Phase 6
-of 11: prep, labels, embed, retrieve, and bench pipelines exist with tests;
-pgvector holds 23k text + 50 image vectors with seeded ACLs and an HNSW index.
-README carries the audited retrieval table (O7 ships). No classification/API code yet.
+permission-aware (search must never leak restricted documents). Currently Phase 7
+of 11: prep, labels, embed, retrieve, bench, and classify pipelines exist with
+tests; pgvector holds 23k text + 50 image vectors with seeded ACLs and an HNSW
+index. README carries the audited retrieval table (O7 ships) and the classifier
+comparison (LR ships). No API code yet.
 Author is learning ML/big data; the core question is how much is model vs
 plumbing (access control, evaluation, data handling).
 
@@ -100,6 +101,12 @@ make seed-acls     # Phase 5: HNSW index + seeded ACLs (DATABASE_URL)
 make leak          # Phase 5: every user × every dev query, zero violations
 make bench-freeze  # Phase 6: freeze 300 queries (DATABASE_URL)
 make bench         # Phase 6: run baseline + O-rows + ablations (DATABASE_URL)
+make classify-data # Phase 7: train.jsonl + eval.jsonl (thread-excluded)
+make classify-lr   # Phase 7: LR rows (needs embeddings-cls/ from Colab 7a)
+make classify-bert # Phase 7: DistilBERT (local) — Colab 7b is faster
+make classify-llm  # Phase 7: Gemma zero-shot (needs HF token + license)
+make decide        # Phase 7: Laya row + GLiNER probe
+make classify-eval # Phase 7: comparison table + reliability JSON
 ```
 
 Per-stack equivalents: `cd python && uv run --extra spark pytest`,

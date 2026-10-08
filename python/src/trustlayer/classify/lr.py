@@ -303,9 +303,10 @@ def main(argv: list[str] | None = None) -> int:
                 "no rebalancing; lr-768cls (no synthetic) is the primary row"
             ),
         }
-    print(
-        f"mixed {len(pii_labels)} PII rows counts={pii_info['pii_counts']}", flush=True
-    )
+        print(
+            f"mixed {len(pii_labels)} PII rows counts={pii_info['pii_counts']}",
+            flush=True,
+        )
 
     x_train = np.asarray(x_list, dtype=np.float32)
     if x_train.shape[1] != DIM:

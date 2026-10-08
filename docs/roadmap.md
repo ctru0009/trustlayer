@@ -119,15 +119,15 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 
 **Goal:** compare four ways of making a sensitivity decision, fairly.
 
-- [ ] Logistic regression on frozen embeddings
-- [ ] Fine-tuned DistilBERT on Colab
-- [ ] LLM zero-shot baseline with cost and latency recorded
-- [ ] MediaPipe Decision Maker as a zero-shot method; NaN check and float32 comparison; verify macOS support
-- [ ] Same gold set, same splits for all; precision, recall, F1, confusion matrices
-- [ ] Calibration: reliability diagram and expected calibration error
-- [ ] 5 to 10 analysed errors
+- [x] Logistic regression on frozen embeddings (Classification prefix, C=10 by CV, + PII ablation)
+- [x] Fine-tuned DistilBERT on Colab (3 epochs, T4, 992s, loss 1.079→0.008)
+- [x] LLM zero-shot baseline with cost and latency recorded (Gemma 3 1B IT, local MPS, $0, 357ms p50)
+- [x] MediaPipe Decision Maker as a zero-shot method; NaN check and float32 comparison; verify macOS support (Laya float32 row — no EG2 asset exists; GLiNER float16 probe 0 NaN/20)
+- [x] Same gold set, same splits for all; precision, recall, F1, confusion matrices (200 gold, thread-excluded train, test-20 secondary)
+- [x] Calibration: reliability diagram and expected calibration error (multiclass ECE, 10 bins, plot in docs/)
+- [x] 5 to 10 analysed errors (8 patterns in the lesson)
 
-**Exit criteria:** one comparison table and a short written conclusion.
+**Exit criteria:** one comparison table and a short written conclusion (done — README + lesson; ship LR).
 **Lesson:** `docs/learnings/phase7.md`
 
 ## Phase 8: Model service and C# gateway (10h)

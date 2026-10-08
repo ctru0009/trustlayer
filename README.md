@@ -9,10 +9,11 @@ is the model, and how much is the plumbing around it — access control, evaluat
 
 ## Status
 
-Phase 6 of 11. The pipeline runs end to end: PySpark prep → weak labels →
+Phase 7 of 11. The pipeline runs end to end: PySpark prep → weak labels →
 EmbeddingGemma-2 embeddings (23k text + 50 image vectors in pgvector) →
 permission-filtered search with a zero-violation leak test (0/69,160) →
-audited retrieval benchmark below. No classification, API, or demo code yet.
+audited retrieval benchmark → classifier comparison below. No API or demo
+code yet.
 
 The plan, with exit criteria per phase, is in [`docs/roadmap.md`](docs/roadmap.md);
 the design is in [`docs/spec.md`](docs/spec.md); per-phase lessons (what I actually
@@ -44,6 +45,31 @@ VI→VI MRR 0.985 — same recall, slightly worse cross-lingual ranking.
 Limits: single-relevant judgments (recall = hit@10); chunk queries favour
 easy docs; 23k-row latency doesn't predict scale. O4 (GGUF) blocked:
 released llama.cpp can't load this model's architecture yet.
+
+## Classifier results (Phase 7)
+
+Five methods on the same 200 gold items (public 64 / internal 119 /
+confidential 17); train = 16,720 weak-labelled chunks minus all gold
+threads. Per-class P/R, confusion matrices, ECE + reliability plot, and
+8 analysed errors in [`docs/learnings/phase7.md`](docs/learnings/phase7.md);
+provenance per row in `data/classify/results/`.
+
+| Method | Macro-F1 | P-con / R-con | ECE | p50 |
+|---|---|---|---|---|
+| DistilBERT fine-tuned (T4) | 0.598 | 0.27 / 1.00 | 0.37 | 6ms |
+| LR on frozen cls embeddings | 0.560 | 0.26 / 0.88 | 0.14 | ~0ms |
+| Gemma 3 1B zero-shot | 0.435 | 0.23 / 0.53 | 0.40 | 357ms |
+| Decision Maker Laya zero-shot | 0.393 | 0.29 / 0.12 | 0.10 | 80ms |
+
+What I would ship: LR — 94% of DistilBERT's F1 at zero inference cost
+with far better calibration (ECE 0.14 vs 0.37). Neither is deployable as
+a gate: confidential precision is ~0.27 everywhere (weak-label
+rule-mimicry), so a flag means "human look", not "is confidential".
+
+![reliability diagrams](docs/phase7-reliability.png)
+
+Limits: 17 confidential positives (wide CIs); agent-reviewed gold;
+zero-shot wordings fixed a priori (no gold tuning).
 
 ## Getting started
 
