@@ -21,6 +21,7 @@ setup:
 test:
 	cd python && uv run --extra spark pytest
 	dotnet test dotnet/TrustLayer.sln --nologo
+
 # Check both stacks without modifying any file.
 lint:
 	cd python && uv run ruff check . ../data/scripts

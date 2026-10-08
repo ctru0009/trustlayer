@@ -9,7 +9,7 @@ The candidate sources are listed in section 5 of
 
 | Source | Used for | Version pinned | Licence | Checked on |
 |---|---|---|---|---|
-| `Yale-LILY/aeslc` | Phase 2 dev corpus (Enron subject-line emails) | rev `2305f2e` (parquet: train 14,436 / validation 1,960 / test 1,906) | CC BY-NC-SA 4.0 (source repo `ryanzhumich/AESLC`; HF page lists `license:unknown`, paper arXiv:1906.03497) | 2026-10-08 |
+| `Yale-LILY/aeslc` | Phase 2 dev corpus (Enron subject-line emails) | rev `2305f2e` (parquet: train 14,436 / validation 1,960 / test 1,906) | `license:unknown` in HF metadata; source repo `ryanzhumich/AESLC` claims CC BY-NC-SA 4.0 — HF page is unverified, NC clause assumed binding for any hosted demo (paper arXiv:1906.03497) | 2026-10-08 |
 
 ## Rules I am holding myself to
 

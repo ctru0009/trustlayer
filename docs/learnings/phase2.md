@@ -32,6 +32,16 @@ the full corpus, drop it or partition by `doc_id` first.
 `shuffle.partitions` is set to `cores * 2` in `session.py` — the default 200
 partitions would mean 200 tiny tasks on a laptop.
 
+## Working-rule override (recorded per your instruction)
+
+The roadmap's working rule said Spark transforms are human-written first, with
+the agent scaffolding boilerplate only. You overrode this for Phase 2
+("No human write"): the agent implemented the full pipeline — `clean`,
+`chunk`, `dedupe`, `run`, tests — and recorded the decisions here instead.
+The rule's intent (you understand the core logic, not just run it) is
+preserved by this lesson: read it as the design review you would have
+written, and the override stands for future phases unless you say otherwise.
+
 ## Why dedupe before splitting
 
 Duplicates that straddle a train/test split leak test content into training:

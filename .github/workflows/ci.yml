@@ -93,6 +93,12 @@ jobs:
         with:
           version: "0.10.9"
 
+      # Same Temurin 21 as the python job: `make test` runs the Spark pipeline.
+      - uses: actions/setup-java@v5.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - uses: actions/setup-dotnet@v6.0.0
         with:
           global-json-file: dotnet/global.json
