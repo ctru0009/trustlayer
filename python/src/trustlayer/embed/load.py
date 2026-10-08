@@ -34,9 +34,10 @@ def ensure_schema(conn: object) -> None:
 def copy_chunk_file(conn: object, path: Path) -> int:
     """COPY one chunk file's vectors into chunks; returns rows loaded.
 
-    Requires metadata rows to exist (``run._insert_metadata`` runs first):
-    the upsert only touches ``embedding``, and ``doc_id``/``ord``/``text``
-    are NOT NULL.
+    Requires metadata rows to exist (``run._insert_metadata`` runs first).
+    Uses UPDATE...FROM, not INSERT...ON CONFLICT: Postgres checks NOT NULL
+    at tuple formation, before conflict detection, so a partial-column
+    upsert against NOT NULL columns always fails — even on matching ids.
     """
     with conn.cursor() as cur:  # type: ignore[attr-defined]
         cur.execute("CREATE TEMP TABLE stage (id TEXT, embedding vector(768))")
@@ -48,8 +49,7 @@ def copy_chunk_file(conn: object, path: Path) -> int:
                 copy.write_row((f"{obj['doc_id']}:{obj['chunk_ord']}", vec))
                 count += 1
         cur.execute(
-            "INSERT INTO chunks (id, embedding) SELECT id, embedding FROM stage"
-            " ON CONFLICT (id) DO UPDATE SET embedding = EXCLUDED.embedding"
+            "UPDATE chunks c SET embedding = s.embedding FROM stage s WHERE c.id = s.id"
         )
         cur.execute("DROP TABLE stage")
     conn.commit()  # type: ignore[attr-defined]

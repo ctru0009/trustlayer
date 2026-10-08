@@ -77,16 +77,16 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 
 **Goal:** resumable embedding of text and images with correct model usage.
 
-- [ ] Load text-only encoder; verify `mps` output against a CPU float32 reference
-- [ ] Pin model revision (commit hash) and record it in the lesson
-- [ ] Prefix handling (`SearchQuery`, `Document`, `Classification`), normalisation, dimension handling
-- [ ] Finite and dimension checks per batch; chunked output; resume after interruption
-- [ ] Text+image encoder path; image subset embedded
-- [ ] Thin Colab notebook that clones the repo and runs the module; saves to Drive per chunk
-- [ ] Time 1,000 documents and extrapolate before any full run
-- [ ] Load embeddings into pgvector
+- [x] Load text-only encoder; verify `mps` output against a CPU float32 reference (cosines ≥ 0.9999999)
+- [x] Pin model revision (`914f7f8`) and record it in the lesson
+- [x] Prefix handling (Document prompt via `encode_document`, no double-prefix), normalisation, dimension handling (768d)
+- [x] Finite and dimension checks per batch; chunked output; resume after interruption (proven: local kill at 5/24, Colab redid all)
+- [x] Text+image encoder path; image subset embedded (FUNSD 50, single-image CPU proof; batch-50 deferred)
+- [x] Thin Colab notebook that clones the repo and runs the module; saves to Drive per chunk (proven: 726s T4 run)
+- [x] Time 1,000 documents and extrapolate before any full run (71.2s MPS → ~28 min predicted)
+- [x] Load embeddings into pgvector (23,267 vectors, 15.3s; UPDATE...FROM after the upsert lesson)
 
-**Exit criteria:** resume test passes; all vectors finite; dev subset fully indexed.
+**Exit criteria:** resume test passes; all vectors finite; dev subset fully indexed (16,961 docs / 23,267 chunks, 0 nulls).
 **Lesson:** `docs/learnings/phase4.md`
 
 ## Phase 5: Permission-aware retrieval (8h)
