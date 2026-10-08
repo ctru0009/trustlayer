@@ -77,9 +77,10 @@ needs a fully valid proposed row, not just a matching key.
   one label per doc for the `documents` table; chunk-grain labels stay in
   Parquet until Phase 5 needs per-chunk filtering.
 - **Image path on CPU** (`load_image_model`, text+image, ~440M params):
-  single FUNSD form verified 768-d/finite/unit-norm, cross-modal cosine
-  0.54. Batch-50 deferred — the text closeout was the priority; CPU
-  avoids the MPS stall class entirely.
+  batch-50 FUNSD run, 199.5s CPU, all 768-d/finite/unit-norm, indexed with
+  `modality='image'`. Images need the Document prompt too: unprompted vs
+  prompted image vectors sit at cos 0.89 — different regions, silently
+  worse cross-modal retrieval without it. CPU avoids the MPS stall class.
 - **FUNSD over RVL-CDIP**: RVL-CDIP is a single 38.7 GB tarball
   (`license: other`) — no subset without the full download. FUNSD test
   split is 50 forms, 4.4 MB, parquet-native. 199 total forms is far short
@@ -89,8 +90,9 @@ needs a fully valid proposed row, not just a matching key.
 
 - **MPS numerics verified but MPS bulk untrusted** (above). Long-batch
   behaviour on MPS is uncharacterized beyond "pathological".
-- **Image subset tiny and unindexed**: 50 FUNSD forms, single-image proof
-  only. Not in pgvector; no image gold queries yet.
+- **Image subset tiny**: 50 FUNSD forms indexed; no image gold queries yet
+  (Phase 5 needs them for F9). 199 total forms is far short of the
+  roadmap's 2k–5k target — right dev size, recorded shortfall.
 - **CUDA/MPS equivalence assumed from CPU**: MPS-vs-CPU verified
   (≥0.9999999); CUDA-vs-CPU not directly measured. Same fp32+eager path
   makes divergence unlikely, but unproven.

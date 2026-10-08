@@ -86,7 +86,7 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 - [x] Time 1,000 documents and extrapolate before any full run (71.2s MPS → ~28 min predicted)
 - [x] Load embeddings into pgvector (23,267 vectors, 15.3s; UPDATE...FROM after the upsert lesson)
 
-**Exit criteria:** resume test passes; all vectors finite; dev subset fully indexed (16,961 docs / 23,267 chunks, 0 nulls).
+**Exit criteria:** resume test passes; all vectors finite; dev subset fully indexed (16,961 text docs / 23,267 chunks + 50 image docs / 50 chunks, 0 nulls).
 **Lesson:** `docs/learnings/phase4.md`
 
 ## Phase 5: Permission-aware retrieval (8h)
