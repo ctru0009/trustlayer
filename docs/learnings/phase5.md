@@ -40,10 +40,13 @@ was probed, not assumed:
 - Selective filter (confidential-HR only, 2% of corpus): 10/10 rows,
   0/100 misses — no starvation at 23k rows.
 
-No shortfall observed at this scale. If it appears at larger scale,
-the documented fix is `hnsw.iterative_scan = 'strict_order'` — an
-enum in pgvector 0.8.7 (`off | relaxed_order | strict_order`), NOT a
-boolean (`=on` errors). Lesson learned by trying `=on` first.
+The 10-query probe showed no shortfall, but the full 6,916-query leak
+run caught one: carol/q553 (boilerplate-heavy query, 7/10 under her
+filter). Exact search returned 10/10, and `strict_order` fixed it —
+the fix ships in `search()` itself, not just in documentation. In
+pgvector 0.8.7 the setting is an enum (`off | relaxed_order |
+strict_order`), NOT a boolean (`=on` errors). Lesson learned by
+trying `=on` first.
 
 Separate concern, kept separate: the leak test asserts permission
 correctness, never recall. Approximate search may miss rows but must
@@ -56,11 +59,16 @@ SearchQuery prompt, top-10) with an independent audit of every hit
 against `acl.visible` — not trusting `search()`'s internal re-check.
 
 ```
-{"users": 4, "queries": 1729, "hits_checked": 69157, "violations": 0,
- "seconds": 94.9}
+{"users": 4, "queries": 1729, "hits_checked": 69160, "violations": 0,
+ "seconds": 96.5}
 ```
 
-69,157 hits independently audited, zero violations. Exit criteria met.
+69,160 hits independently audited, zero violations. Every user gets a
+full top-10 on every query — the harness fails on any shortfall, so a
+vacuous pass is impossible. First run caught carol/q553 at 7/10 (a
+boilerplate-heavy query starving the HNSW walk under her filter);
+`SET hnsw.iterative_scan = 'strict_order'` in `search()` closed it.
+Exit criteria met.
 
 ## Text + image in one list (F9)
 

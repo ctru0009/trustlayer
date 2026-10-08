@@ -7,8 +7,6 @@ import pytest
 from trustlayer.retrieve.acl import USERS, visible
 from trustlayer.retrieve.seed import assign
 
-psycopg = pytest.importorskip("psycopg", reason="needs the embed extra")
-
 DB_URL = os.environ.get("DATABASE_URL")
 needs_db = pytest.mark.skipif(not DB_URL, reason="needs DATABASE_URL")
 
@@ -48,6 +46,7 @@ def test_seed_rules_per_label() -> None:
 
 @needs_db
 def test_search_returns_only_visible_hits() -> None:
+    psycopg = pytest.importorskip("psycopg", reason="needs the embed extra")
     from trustlayer.retrieve.search import search
 
     conn = psycopg.connect(DB_URL)
@@ -59,7 +58,7 @@ def test_search_returns_only_visible_hits() -> None:
         vec = [float(x) for x in row[0].strip("[]").split(",")]
         for user in USERS:
             hits = search(conn, vec, user, top_k=10)
-            assert len(hits) <= 10
+            assert len(hits) == 10, (user, "vacuous pass?")
             for hit in hits:
                 with conn.cursor() as cur:
                     cur.execute(
@@ -75,6 +74,7 @@ def test_search_returns_only_visible_hits() -> None:
 
 @needs_db
 def test_search_unknown_user_raises() -> None:
+    psycopg = pytest.importorskip("psycopg", reason="needs the embed extra")
     from trustlayer.retrieve.search import search
 
     conn = psycopg.connect(DB_URL)

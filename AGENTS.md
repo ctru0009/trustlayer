@@ -98,7 +98,7 @@ make embed   # Phase 4: corpus → embeddings/ + pgvector (DATABASE_URL or --ski
 make embed-images  # Phase 4: FUNSD → embeddings-images/ + pgvector (CPU)
 make seed-acls     # Phase 5: HNSW index + seeded ACLs (DATABASE_URL)
 make leak          # Phase 5: every user × every dev query, zero violations
-
+```
 Per-stack equivalents: `cd python && uv run --extra spark pytest`,
 `cd python && uv run ruff check . ../data/scripts`,
 `dotnet test dotnet/TrustLayer.sln --nologo`. Make targets self-add

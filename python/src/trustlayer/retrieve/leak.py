@@ -68,12 +68,17 @@ def main(argv: list[str] | None = None) -> int:
         # below re-verifies every hit against acl.visible without trusting
         # search()'s assert path.
         violations = 0
-        checked = 0
+        per_user: dict[str, int] = {}
+        shortfalls: list[str] = []
         with conn.cursor() as cur:
             for user, roles in USERS.items():
-                for vec in vectors:
-                    for hit in search(conn, vec.tolist(), user, top_k=args.top_k):
-                        checked += 1
+                got = 0
+                for qi, vec in enumerate(vectors):
+                    hits = search(conn, vec.tolist(), user, top_k=args.top_k)
+                    got += len(hits)
+                    if len(hits) < args.top_k:
+                        shortfalls.append(f"{user}/q{qi}:{len(hits)}")
+                    for hit in hits:
                         cur.execute(
                             "SELECT label, allowed_roles FROM documents WHERE id = %s",
                             (hit.doc_id,),
@@ -81,16 +86,27 @@ def main(argv: list[str] | None = None) -> int:
                         label, allowed = cur.fetchone()
                         if not visible(label, list(allowed), list(roles)):
                             violations += 1
+                per_user[user] = got
     finally:
         conn.close()
+    checked = sum(per_user.values())
+    # A vacuous pass (no hits) would hide an over-restrictive predicate:
+    # every user must see results on every query.
+    expected = len(USERS) * len(vectors) * args.top_k
     stats = {
         "users": len(USERS),
         "queries": len(vectors),
         "hits_checked": checked,
+        "expected_hits": expected,
+        "per_user": per_user,
+        "shortfalls": shortfalls[:20],
         "violations": violations,
         "seconds": round(time.monotonic() - started, 1),
     }
     print(json.dumps(stats, indent=2))
+    if checked != expected:
+        print(f"SHORTFALL: {checked}/{expected} hits", file=sys.stderr)
+        return 1
     return 1 if violations else 0
 
 

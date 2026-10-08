@@ -95,11 +95,11 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 
 - [x] Seed synthetic users, roles and ACLs (fixed seed — blake2b(doc_id), 11,573/4,724/714)
 - [x] SQL pre-filter by `allowed_roles` and label rules (+ Python re-check, PermissionError on drift)
-- [x] Test recall under filtering with HNSW; document behaviour and the fix (no shortfall at 23k; `strict_order` enum documented)
-- [x] Leak test over every user and evaluation query (4 × 1,729, 69,157 hits, 0 violations)
+- [x] Test recall under filtering with HNSW; document behaviour and the fix (1 shortfall in 6,916 queries, `strict_order` ships in `search()`)
+- [x] Leak test over every user and evaluation query (4 × 1,729, 69,160 hits, 0 violations)
 - [x] Text and image results in one ranked list (modality per hit, mixed ranking verified)
 
-**Exit criteria:** leak test shows zero violations (0/69,157, 94.9s).
+**Exit criteria:** leak test shows zero violations (0/69,160, 96.5s).
 **Lesson:** `docs/learnings/phase5.md`
 
 ## Phase 6: Retrieval benchmark (15h)

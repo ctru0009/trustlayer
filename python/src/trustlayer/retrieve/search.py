@@ -43,6 +43,10 @@ def search(conn: object, vector: list[float], user: str, top_k: int = 10) -> lis
     roles = list(USERS[user])
     vec = "[" + ",".join(repr(x) for x in vector) + "]"
     with conn.cursor() as cur:  # type: ignore[attr-defined]
+        # strict_order: filtered HNSW can return fewer than LIMIT rows
+        # (spec §8.4.4 — observed: carol/q553 boilerplate query got 7/10).
+        # Iterative scan re-walks until LIMIT passing rows are found.
+        cur.execute("SET hnsw.iterative_scan = 'strict_order'")
         cur.execute(
             "SELECT c.id, c.doc_id, d.title, c.text, d.modality, d.label,"
             " c.embedding <=> %s::vector AS dist"
