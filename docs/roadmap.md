@@ -64,13 +64,13 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 
 **Goal:** trustworthy labels and a frozen test set.
 
-- [ ] Choose and document the labelled PII dataset; note licence and languages
-- [ ] Define the label scheme (`public | internal | confidential`, plus PII flags)
-- [ ] Weak-label the email corpus with rules, then hand-check 200 items as the gold set
-- [ ] Freeze train, dev and test splits (by thread); commit split manifests, not data
-- [ ] Write down known label limits in `docs/learnings/phase3.md`
+- [x] Choose and document the labelled PII dataset; note licence and languages (`ai4privacy/pii-masking-43k`, custom free-for-small-team licence, English, synthetic — see SOURCES.md)
+- [x] Define the label scheme (`public | internal | confidential`, plus PII flags) in `trustlayer.labels.rules`
+- [x] Weak-label the email corpus with rules (16,650/5,791/826 over 23,267 chunks), then review 200 items as the gold set (agent-reviewed per your decision; agreement 123/200)
+- [x] Freeze train, dev and test splits (by thread, 13,483/1,729/1,749 docs, seed 42); commit split manifests, not data
+- [x] Write down known label limits in `docs/learnings/phase3.md`
 
-**Exit criteria:** frozen gold set and split manifests; labelling notes in the lesson.
+**Exit criteria:** frozen gold set (`data/gold/gold.jsonl`, git-ignored) and split manifests (committed); labelling notes in the lesson.
 **Lesson:** `docs/learnings/phase3.md`
 
 ## Phase 4: Embedding pipeline, text and image (10h)

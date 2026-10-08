@@ -7,7 +7,7 @@
 
 COMPOSE := docker compose --project-directory . -f infra/docker-compose.yml
 
-.PHONY: setup test lint up down prep
+.PHONY: setup test lint up down prep labels
 
 # Install both stacks' dependencies and the pre-commit hook.
 # This installs the base Python env (no PySpark); `make test` and `make prep`
@@ -42,3 +42,8 @@ down:
 # Needs Java 17+ for Spark; run `uv sync --extra spark` first (once).
 prep:
 	cd python && uv run --extra spark python -m trustlayer.prep.run
+
+# Phase 3 pipeline: corpus → weak labels + gold sample + split manifests.
+# Needs Java 17+ for Spark. Gold review is a separate step afterwards.
+labels:
+	cd python && uv run --extra spark python -m trustlayer.labels.run --gold --splits

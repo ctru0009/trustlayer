@@ -4,6 +4,14 @@
 data/*
 !data/SOURCES.md
 !data/scripts/
+# Split manifests are committable: doc_ids are content hashes (`split:sha8`),
+# no email text. Gold labels stay ignored (they embed chunk text). The parent
+# chain must be un-ignored first: git cannot re-include under an excluded dir.
+!data/gold/
+data/gold/*
+!data/gold/splits/
+data/gold/splits/*
+!data/gold/splits/*.txt
 
 # --- Secrets -----------------------------------------------------------------
 .env

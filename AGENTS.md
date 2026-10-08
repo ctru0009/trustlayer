@@ -4,8 +4,9 @@
 
 Trust Layer: a learning project building private on-device semantic search over
 documents and screenshots — ranked by meaning, sensitivity-labelled, and
-permission-aware (search must never leak restricted documents). Currently Phase 1
-of 11: scaffolding only, no embedding/retrieval/classification/API code yet.
+permission-aware (search must never leak restricted documents). Currently Phase 3
+of 11: prep pipeline (`trustlayer.prep`) and weak labeller (`trustlayer.labels`)
+exist with tests; no embedding/retrieval/classification/API code yet.
 Author is learning ML/big data; the core question is how much is model vs
 plumbing (access control, evaluation, data handling).
 
@@ -13,8 +14,9 @@ plumbing (access control, evaluation, data handling).
 
 From `docs/roadmap.md` — these override default agent instincts:
 
-- **Core logic is human-written**: training loops, metrics, retrieval filter,
-  Spark transforms. Agent reviews and suggests; agent MAY scaffold boilerplate.
+- **Agent implements, lesson records**: you overrode human-writes-core-logic
+  ("No human write") — the agent builds, and the per-phase lesson in
+  `docs/learnings/` records decisions and rationale instead.
 - **Lessons over rituals**: each phase gets a lesson in `docs/learnings/phaseN.md`
   (concepts, tips and tricks, spec pointers), written alongside the work — no
   before/after notes, no quizzes gating progress.
@@ -56,14 +58,17 @@ exists.
 
 ## Key Directories
 
-- `python/src/trustlayer/` — Python package (currently `__init__.py` stub with
-  `__version__` only; `prep`, `embed`, `classify`, `decide`, `bench`, `service`
-  modules arrive in later phases).
+- `python/src/trustlayer/` — `prep/` (Phase 2: clean/chunk pure-Python,
+  dedupe/run/session/schema Spark; `make prep`), `labels/` (Phase 3:
+  rules pure-Python, run/schema Spark; `make labels`). `embed`, `classify`,
+  `decide`, `bench`, `service` arrive in later phases.
 - `dotnet/src/TrustLayer.Gateway/` — C# gateway (currently stock minimal-API
   `Program.cs`, `GET /` → "Hello World!"; real endpoints in Phase 8).
-- `python/tests/`, `dotnet/tests/` — one placeholder suite each (see Testing).
-- `data/` — git-ignored; only `SOURCES.md` (dataset registry) and `scripts/`
-  (download scripts) are committed. Never commit raw data.
+- `python/tests/` — prep + labels suites (unit + Spark e2e); `dotnet/tests/` —
+  one xUnit placeholder (see Testing).
+- `data/` — git-ignored; `SOURCES.md` (dataset registry), `scripts/` (download
+  scripts), and `gold/splits/*.txt` (doc_id manifests, content hashes) are
+  committed. Never commit raw data or gold content (embeds chunk text).
 - `infra/` — `docker-compose.yml` (Postgres + pgvector), `db/migrations/`
   (empty until Phase 4), `dockerfiles/` (empty until Phase 8),
   `hooks/pre-commit` (installed by `make setup`).
