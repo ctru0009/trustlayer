@@ -4,12 +4,12 @@ Every public dataset this project touches gets a row here before it is used: exa
 and the date I checked it. No data is committed — `data/` is git-ignored apart from this file and
 `data/scripts/` (download scripts only).
 
-Nothing is downloaded yet; the candidate sources are listed in section 5 of
+The candidate sources are listed in section 5 of
 [`../docs/spec.md`](../docs/spec.md) with the handling rules that apply to each.
 
 | Source | Used for | Version pinned | Licence | Checked on |
 |---|---|---|---|---|
-| _none yet — Phase 2_ | | | | |
+| `Yale-LILY/aeslc` | Phase 2 dev corpus (Enron subject-line emails) | rev `2305f2e` (parquet: train 14,436 / validation 1,960 / test 1,906) | CC BY-NC-SA 4.0 (source repo `ryanzhumich/AESLC`; HF page lists `license:unknown`, paper arXiv:1906.03497) | 2026-10-08 |
 
 ## Rules I am holding myself to
 

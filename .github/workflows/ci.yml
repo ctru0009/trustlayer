@@ -33,18 +33,25 @@ jobs:
           enable-cache: true
           cache-dependency-glob: python/uv.lock
 
+      # Temurin 21 for PySpark (matches the dev machine's Homebrew openjdk@21;
+      # Spark 4.x needs Java 17+). Without this the pipeline test skips.
+      - uses: actions/setup-java@v5.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+
       # --locked fails if uv.lock and pyproject.toml disagree, so a dependency
       # bump that forgot to re-lock breaks CI instead of drifting silently.
       - name: Install dependencies
-        run: uv sync --locked
+        run: uv sync --locked --extra spark
 
       - name: Lint
-        run: uv run ruff check .
+        run: uv run ruff check . ../data/scripts
       - name: Check formatting
-        run: uv run ruff format --check .
+        run: uv run ruff format --check . ../data/scripts
 
       - name: Test
-        run: uv run pytest
+        run: uv run --extra spark pytest
 
   # Focused job: fast, unambiguous feedback on the .NET stack alone.
   dotnet:

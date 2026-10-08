@@ -48,15 +48,17 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 
 **Goal:** a cleaned, deduplicated, chunked Parquet corpus.
 
-- [ ] Download scripts (not data) for the dev subset, then the full corpus
-- [ ] Parse emails, strip quoted replies and signatures where reasonable, extract thread IDs
-- [ ] Near-duplicate removal; dedup stats logged
-- [ ] Chunking with a documented size and overlap choice
-- [ ] Output Parquet with a documented schema; unit tests on the transforms
-- [ ] Record row counts and runtime for the dev subset and the full run
+- [x] Download script (not data) for the dev subset (`data/scripts/download_aeslc.py`)
+- [x] Parse emails, strip quoted replies and signatures where reasonable, extract thread IDs
+- [x] Near-duplicate removal; dedup stats logged (`corpus-stats.json`)
+- [x] Chunking with a documented size and overlap choice (1000/100, see lesson)
+- [x] Output Parquet with a documented schema; unit tests on the transforms
+- [x] Record row counts and runtime for the dev subset (18,302 → 23,267 chunks, 8.9s; full Enron run deferred — see below)
 
-**Exit criteria:** reproducible Parquet from a single command; tests pass.
+**Exit criteria:** reproducible Parquet from a single command (`make prep`); tests pass (17 Python + 1 xUnit).
 **Lesson:** `docs/learnings/phase2.md`
+
+**Follow-up (not blocking Phase 3):** full-corpus run on the Enron email corpus (Kaggle `wcukierski/enron-email-dataset` or CMU original) — needs the download script, a real `thread_id` from mail headers (replacing the pseudo-thread approximation), and recorded row counts/runtime at scale.
 
 ## Phase 3: Labels and gold set (6h)
 
