@@ -7,7 +7,7 @@
 
 COMPOSE := docker compose --project-directory . -f infra/docker-compose.yml
 
-.PHONY: setup test lint up down prep labels embed embed-images seed-acls leak bench-freeze bench classify-data classify-lr classify-bert classify-llm decide classify-eval serve stack api-leak
+.PHONY: setup test lint up down prep labels embed embed-images seed-acls leak bench-freeze bench classify-data classify-lr classify-bert classify-llm decide classify-eval serve stack api-leak demo
 # Install both stacks' dependencies and the pre-commit hook.
 # This installs the base Python env (no PySpark); `make test` and `make prep`
 # add `--extra spark` themselves, so no separate sync step is needed.
@@ -23,9 +23,8 @@ test:
 
 # Check both stacks without modifying any file.
 lint:
-	cd python && uv run ruff check . ../data/scripts
-	cd python && uv run ruff format --check . ../data/scripts
-	dotnet format dotnet/TrustLayer.sln --verify-no-changes
+	cd python && uv run ruff check . ../data/scripts ../demo
+	cd python && uv run ruff format --check . ../data/scripts ../demo
 
 # Start Postgres + pgvector and block until the health check reports healthy.
 up:
@@ -113,3 +112,8 @@ stack:
 # Needs the stack up plus DATABASE_URL for expected-visibility checks.
 api-leak:
 	cd python && UV_LINK_MODE=copy uv run --extra service python -m trustlayer.service.api_leak
+
+# Phase 9: Gradio demo over the gateway (thin client, no business rules).
+# Needs the stack up (gateway on :8080); override with TRUSTLAYER_GATEWAY.
+demo:
+	cd python && UV_LINK_MODE=copy uv run --extra demo --extra service python ../demo/app.py

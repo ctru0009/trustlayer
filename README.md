@@ -59,6 +59,15 @@ the response tells you exactly where the time went, and nothing in it required
 trusting a probability with an access decision. Permissions live in C# and SQL,
 where randomness cannot reach them.
 
+Prefer clicking to curling? `make demo` starts a Gradio UI over the same
+gateway (needs `make stack` up first). Log in as alice, ask about the
+vacation policy, then switch to carol and ask again — the same query
+returns different results, and fetching a confidential document as carol
+gives the same 404 as a missing one.
+
+![demo: ask](docs/demo-ask.png)
+![demo: permission block](docs/demo-block.png)
+
 ## Why this exists
 
 I am a software engineer (TypeScript, C#, Postgres) teaching myself ML and big
@@ -199,11 +208,14 @@ output. No user fields exist anywhere in that module, on purpose.
 
 ## What I would do next
 
-Human gold review first, then a Gradio demo over the gateway (Phase 9), then a
-90-second demo video (Phase 10). Longer term: temperature scaling for the
-miscalibrated rows, Phase 6 variant tables wired into the gateway so dimension
-is negotiated instead of pinned, and the audio stretch if phases 1 to 10 hold
-up. The cut list in the roadmap says what goes first if time runs short.
+Human gold review first (the 77 overruled items are the highest-value
+validation left), then a 90-second demo video (Phase 10). Longer term:
+temperature scaling for the miscalibrated rows, Phase 6 variant tables
+wired into the gateway so dimension is negotiated instead of pinned, a
+public hosted demo on Hugging Face Spaces with a precomputed small index
+(local compose stays the documented path either way), and the audio
+stretch if phases 1 to 10 hold up. The cut list in the roadmap says what
+goes first if time runs short.
 
 ## Contributing
 

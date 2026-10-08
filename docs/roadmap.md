@@ -146,11 +146,11 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 
 **Goal:** a public, skimmable repo with a live demo where possible.
 
-- [ ] Gradio demo over the gateway
-- [ ] Hosting, in order of preference: Hugging Face Spaces (free) with a precomputed small index; a Google option if credits allow; local Docker Compose always documented
-- [ ] Architecture diagram; README per the voice guide in `spec.md`
-- [ ] Limitations and "what I would do next" sections
-- [ ] Final fresh-clone test
+- [x] Gradio demo over the gateway (`make demo`, login/ask/classify/document tabs)
+- [x] Hosting, in order of preference: local Docker Compose documented (`demo/README.md`); public HF Spaces deferred per the cut list (item 5), recorded in the lesson
+- [x] Architecture diagram; README per the voice guide in `spec.md` (demo section + screenshots added)
+- [x] Limitations and "what I would do next" sections (already present; next-steps updated)
+- [x] Final fresh-clone test (CI `stack` job: `make setup && make test`, `make up`, pgvector assert)
 
 **Exit criteria:** acceptance criteria 1 to 5 and 7 from `spec.md` met.
 **Lesson:** `docs/learnings/phase9.md`
