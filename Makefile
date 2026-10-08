@@ -7,7 +7,7 @@
 
 COMPOSE := docker compose --project-directory . -f infra/docker-compose.yml
 
-.PHONY: setup test lint up down prep labels embed embed-images
+.PHONY: setup test lint up down prep labels embed embed-images seed-acls leak
 
 # Install both stacks' dependencies and the pre-commit hook.
 # This installs the base Python env (no PySpark); `make test` and `make prep`
@@ -57,3 +57,13 @@ embed:
 # CPU default (50 forms, ~3 min); needs DATABASE_URL unless --skip-load.
 embed-images:
 	cd python && UV_LINK_MODE=copy uv run --extra embed --extra spark python -m trustlayer.embed.run --images ../data/raw/funsd/test-00000-of-00001.parquet --device cpu --batch-size 8
+
+# Phase 5: seeded ACLs + HNSW index. Needs DATABASE_URL.
+seed-acls:
+	docker compose --project-directory . -f infra/docker-compose.yml exec -T db psql -U trustlayer -d trustlayer -v ON_ERROR_STOP=1 -f - < infra/db/migrations/002_hnsw_index.sql
+	cd python && UV_LINK_MODE=copy uv run --extra embed python -c "import os, psycopg, json; from trustlayer.retrieve.seed import seed_acls; conn = psycopg.connect(os.environ['DATABASE_URL']); print(json.dumps(seed_acls(conn))); conn.close()"
+
+# Phase 5 leak test: every user × every dev query, zero violations.
+# Needs DATABASE_URL; CPU encode of ~1.7k queries takes a few minutes.
+leak:
+	cd python && UV_LINK_MODE=copy uv run --extra embed python -m trustlayer.retrieve.leak

@@ -4,9 +4,10 @@
 
 Trust Layer: a learning project building private on-device semantic search over
 documents and screenshots — ranked by meaning, sensitivity-labelled, and
-permission-aware (search must never leak restricted documents). Currently Phase 4
-of 11: prep, labels, and embed pipelines exist with tests; pgvector holds
-23k text + 50 image vectors. No retrieval/classification/API code yet.
+permission-aware (search must never leak restricted documents). Currently Phase 5
+of 11: prep, labels, embed, and retrieve pipelines exist with tests; pgvector
+holds 23k text + 50 image vectors with seeded ACLs and an HNSW index. No
+classification/benchmark/API code yet.
 Author is learning ML/big data; the core question is how much is model vs
 plumbing (access control, evaluation, data handling).
 
@@ -95,7 +96,8 @@ make prep    # Phase 2: raw AESLC → data/processed/corpus/ + stats
 make labels  # Phase 3: corpus → weak labels + gold sample + split manifests
 make embed   # Phase 4: corpus → embeddings/ + pgvector (DATABASE_URL or --skip-load)
 make embed-images  # Phase 4: FUNSD → embeddings-images/ + pgvector (CPU)
-```
+make seed-acls     # Phase 5: HNSW index + seeded ACLs (DATABASE_URL)
+make leak          # Phase 5: every user × every dev query, zero violations
 
 Per-stack equivalents: `cd python && uv run --extra spark pytest`,
 `cd python && uv run ruff check . ../data/scripts`,
