@@ -1,0 +1,17 @@
+<Project>
+  <!-- Repo-wide .NET strictness: Recommended analyzers fail the build, and
+       .editorconfig style rules are enforced at build time, so violations
+       surface on `dotnet build`, not just on `make lint`. -->
+  <PropertyGroup>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <!-- CA1502 (cyclomatic complexity) threshold: analyzers only read it as an
+       AdditionalFile, not from .editorconfig. "CA1502: 39" flags methods
+       with complexity >= 40. -->
+  <ItemGroup>
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)CodeMetricsConfig.txt" />
+  </ItemGroup>
+</Project>

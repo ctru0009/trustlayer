@@ -1,0 +1,8 @@
+# (No `root = true`: this file adds to the repo .editorconfig rather than
+# replacing it. A root flag here would silently drop the parent's formatting
+# rules and the CA1502 severity for every file under tests/.)
+# xUnit convention is MethodName_Scenario_ExpectedBehavior; CA1707 (no
+# underscores in identifiers) conflicts with it, so tests opt out. Production
+# code keeps the rule.
+[*.cs]
+dotnet_diagnostic.CA1707.severity = none

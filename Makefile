@@ -9,12 +9,13 @@ COMPOSE := docker compose --project-directory . -f infra/docker-compose.yml
 
 .PHONY: setup test lint up down
 
-# Install both stacks' dependencies.
+# Install both stacks' dependencies and the pre-commit hook.
 # PySpark is deliberately not installed here; Phase 2 adds it with:
 #   cd python && uv sync --extra spark
 setup:
 	cd python && uv sync
 	dotnet restore dotnet/TrustLayer.sln
+	install -m 755 infra/hooks/pre-commit .git/hooks/pre-commit
 
 # Run both test suites. Fails on the first stack that fails.
 test:
@@ -24,6 +25,7 @@ test:
 # Check both stacks without modifying any file.
 lint:
 	cd python && uv run ruff check .
+	cd python && uv run ruff format --check .
 	dotnet format dotnet/TrustLayer.sln --verify-no-changes
 
 # Start Postgres + pgvector and block until the health check reports healthy.

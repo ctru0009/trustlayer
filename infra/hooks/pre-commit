@@ -1,0 +1,20 @@
+#!/bin/sh
+# Pre-commit: fast lint + format checks for both stacks.
+# Installed into .git/hooks by `make setup`. Tests are deliberately out of
+# scope here - CI runs them; this hook must stay under ~10s.
+set -eu
+
+for tool in uv dotnet git; do
+  command -v "$tool" >/dev/null 2>&1 || {
+    echo "pre-commit: '$tool' not found; run 'make setup' first" >&2
+    exit 1
+  }
+done
+
+root="$(git rev-parse --show-toplevel)"
+cd "$root/python"
+uv run ruff check .
+uv run ruff format --check .
+
+cd "$root"
+dotnet format dotnet/TrustLayer.sln --verify-no-changes

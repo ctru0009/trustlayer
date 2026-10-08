@@ -33,4 +33,16 @@ target-version = "py312"
 line-length = 88
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+# E/F: errors and pyflakes. I: import sorting. UP: py312 idioms. B: bugbear
+# bug patterns. SIM/C4: simplifications. PTH: pathlib over os.path.
+# TID: tidy imports. Q: quote style. S: bandit security. D: docstrings.
+# C901: complexity gate. S and D are relaxed for tests below.
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "PTH", "TID", "Q", "S", "D", "C901"]
+
+[tool.ruff.lint.mccabe]
+# Ruff flags complexity *above* the max, so 39 means >= 40 fails.
+max-complexity = 39
+
+[tool.ruff.lint.per-file-ignores]
+# Pytest idioms: plain assert and undocumented test functions are fine.
+"tests/**" = ["S101", "D"]
