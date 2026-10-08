@@ -27,8 +27,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options => options.TokenValidationParameters = tokens.ValidationParameters());
 builder.Services.AddAuthorization();
 builder.Services.AddHttpClient<IModelService, ModelServiceClient>(client =>
+{
     client.BaseAddress = new Uri(
-        builder.Configuration["ModelService:BaseUrl"] ?? "http://localhost:8000"));
+        builder.Configuration["ModelService:BaseUrl"] ?? "http://localhost:8000");
+    // Answer mode runs Gemma generation on CPU (minutes in-container);
+    // the default 100s HttpClient timeout would cancel legitimate calls.
+    client.Timeout = TimeSpan.FromMinutes(10);
+});
 builder.Services.AddSingleton<IDocumentStore>(_ => new DocumentStore(
     builder.Configuration.GetConnectionString("TrustLayer")
     ?? "Host=localhost;Port=5432;Database=trustlayer;Username=trustlayer;Password=trustlayer_local"));
@@ -119,6 +124,10 @@ app.MapPost("/ask", [Authorize] async (
     {
         return Results.Problem("model service unavailable: " + ex.Message, statusCode: 503);
     }
+    catch (TaskCanceledException)
+    {
+        return Results.Problem("model service timed out", statusCode: 503);
+    }
 
     if (embedded.Vector.Length != 768)
     {
@@ -160,6 +169,10 @@ app.MapPost("/ask", [Authorize] async (
     catch (HttpRequestException ex)
     {
         return Results.Problem("model service unavailable: " + ex.Message, statusCode: 503);
+    }
+    catch (TaskCanceledException)
+    {
+        return Results.Problem("model service timed out", statusCode: 503);
     }
 
     var citations = hits.Select(h => new Citation(h.DocId, h.ChunkId, h.Title)).ToArray();
@@ -222,6 +235,10 @@ app.MapPost("/classify", [Authorize] async (
     catch (HttpRequestException ex)
     {
         return Results.Problem("model service unavailable: " + ex.Message, statusCode: 503);
+    }
+    catch (TaskCanceledException)
+    {
+        return Results.Problem("model service timed out", statusCode: 503);
     }
 
     return Results.Ok(new ClassifyResponse(

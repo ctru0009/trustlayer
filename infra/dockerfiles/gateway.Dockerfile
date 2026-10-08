@@ -15,8 +15,12 @@ RUN dotnet publish src/TrustLayer.Gateway/TrustLayer.Gateway.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build /publish ./
+# curl exists only for the HEALTHCHECK (the runtime image ships neither
+# curl nor wget); kept in one layer with the apt lists removed.
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
 HEALTHCHECK --interval=10s --timeout=5s --retries=12 \
-    CMD wget -qO- http://localhost:8080/health || exit 1
+    CMD curl -fsS http://localhost:8080/health || exit 1
 ENTRYPOINT ["dotnet", "TrustLayer.Gateway.dll"]

@@ -76,7 +76,7 @@ services:
     environment:
       ConnectionStrings__TrustLayer: Host=db;Port=5432;Database=${POSTGRES_DB:-trustlayer};Username=${POSTGRES_USER:-trustlayer};Password=${POSTGRES_PASSWORD:-trustlayer_local}
       ModelService__BaseUrl: http://service:8000
-      Jwt__Secret: ${JWT_SECRET:-dev-only-change-me}
+      Jwt__Secret: ${JWT_SECRET:-dev-only-change-me-not-a-real-secret-32-chars}
     depends_on:
       db:
         condition: service_healthy
