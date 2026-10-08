@@ -7,8 +7,7 @@
 
 COMPOSE := docker compose --project-directory . -f infra/docker-compose.yml
 
-.PHONY: setup test lint up down prep labels embed embed-images seed-acls leak bench-freeze bench
-
+.PHONY: setup test lint up down prep labels embed embed-images seed-acls leak bench-freeze bench classify-data classify-lr classify-bert classify-llm decide classify-eval
 # Install both stacks' dependencies and the pre-commit hook.
 # This installs the base Python env (no PySpark); `make test` and `make prep`
 # add `--extra spark` themselves, so no separate sync step is needed.
@@ -75,3 +74,27 @@ bench-freeze:
 
 bench:
 	cd python && UV_LINK_MODE=copy uv run --extra embed python -m trustlayer.bench.harness
+
+# Phase 7: weak-label train JSONL + gold eval JSONL (thread-level exclusion).
+classify-data:
+	cd python && UV_LINK_MODE=copy uv run --extra classify --extra spark python -m trustlayer.classify.data
+
+# Phase 7 rows: LR on frozen Classification-prefix embeddings (needs vectors first).
+classify-lr:
+	cd python && UV_LINK_MODE=copy uv run --extra classify --extra embed --extra spark python -m trustlayer.classify.lr
+
+# Phase 7 row: fine-tuned DistilBERT (GPU job; embed extra covers torch).
+classify-bert:
+	cd python && UV_LINK_MODE=copy uv run --extra embed python -m trustlayer.classify.bert
+
+# Phase 7 row: Gemma zero-shot baseline (embed extra covers transformers).
+classify-llm:
+	cd python && UV_LINK_MODE=copy uv run --extra embed python -m trustlayer.classify.llm
+
+# Phase 7 row: MediaPipe Decision Maker Laya (zero-shot; classify extra).
+decide:
+	cd python && UV_LINK_MODE=copy uv run --extra classify python -m trustlayer.decide.run
+
+# Phase 7: score all rows, write comparison.json + reliability.json, print table.
+classify-eval:
+	cd python && UV_LINK_MODE=copy uv run python -m trustlayer.classify.eval

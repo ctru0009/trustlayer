@@ -28,6 +28,14 @@ embed = [
     "torchvision==0.29.1",
     "transformers==5.19.0",
 ]
+# Phase 7 pins the classifier-comparison stack: scikit-learn (LR on frozen
+# embeddings) + mediapipe (Decision Maker Laya row). Transformer-backed rows
+# (DistilBERT fine-tune, Gemma zero-shot) reuse the embed extra. Install with:
+# uv sync --extra classify
+classify = [
+    "mediapipe==1.1.0",
+    "scikit-learn==1.9.1",
+]
 
 [dependency-groups]
 dev = [
