@@ -8,6 +8,8 @@ texts from the test split, relevance = source document.
 
 9 configs on the same 300 queries, exact protocol per spec §10
 (warm-up + 5 repeats, bootstrap CIs, config logged per run):
+| Config | R@10 | MRR | nDCG | p50 | Size |
+|---|---|---|---|---|---|
 | baseline (768d fp32 exact) | 0.977 | 0.911 | 0.927 | 31ms | 100MB |
 | O1 512d | 0.977 | 0.911 | 0.927 | 29ms | 69MB |
 | O2 256d | 0.973 | 0.895 | 0.914 | 5.5ms | 29MB |
