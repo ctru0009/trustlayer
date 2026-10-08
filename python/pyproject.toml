@@ -38,6 +38,9 @@ line-length = 88
 # TID: tidy imports. Q: quote style. S: bandit security. D: docstrings.
 # C901: complexity gate. S and D are relaxed for tests below.
 select = ["E", "F", "I", "UP", "B", "SIM", "C4", "PTH", "TID", "Q", "S", "D", "C901"]
+# D203/D211 and D212/D213 pairs conflict; ruff already ignores D203/D213 by
+# default. Pin that choice so `make lint` stays warning-free.
+ignore = ["D203", "D213"]
 
 [tool.ruff.lint.mccabe]
 # Ruff flags complexity *above* the max, so 39 means >= 40 fails.
