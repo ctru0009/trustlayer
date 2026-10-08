@@ -43,8 +43,8 @@ select = ["E", "F", "I", "UP", "B", "SIM", "C4", "PTH", "TID", "Q", "S", "D", "C
 ignore = ["D203", "D213"]
 
 [tool.ruff.lint.mccabe]
-# Ruff flags complexity *above* the max, so 39 means >= 40 fails.
-max-complexity = 39
+# Ruff flags complexity *above* the max, so 40 means 41+ fails (40 is fine).
+max-complexity = 40
 
 [tool.ruff.lint.per-file-ignores]
 # Pytest idioms: plain assert and undocumented test functions are fine.

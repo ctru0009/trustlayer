@@ -19,11 +19,10 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 
 ## Working rules (every phase)
 
-- Concept first, code second: write 3 to 5 lines in `LEARNING.md` before starting a phase, and 3 to 5 more after.
 - The core logic (training loops, metrics, retrieval filter, Spark transforms) is written by me first; the AI agent reviews and suggests. The agent may scaffold boilerplate.
-- After each phase, get quizzed (5 questions, one at a time) and fix the gaps.
 - Every number that appears in the README must trace to a run log or notebook.
 - Check for NaN and wrong dimensions before trusting any embedding run.
+- Each phase has a lesson in `docs/learnings/phaseN.md`: concepts, tips and tricks, spec pointers. Lessons are written alongside the work, not gated before or after it.
 
 ---
 
@@ -37,11 +36,11 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 - [x] `docker-compose.yml` with Postgres + pgvector and a health check; migration folder
 - [x] `Makefile` targets: `setup`, `test`, `lint`, `up`, `down`
 - [x] GitHub Actions: build and test both stacks
-- [x] `data/SOURCES.md` and `LEARNING.md` stubs
+- [x] `data/SOURCES.md` stub and `docs/learnings/` lesson convention
 - [x] Verify Java version compatible with the pinned PySpark
 
 **Exit criteria:** `make setup && make test` green locally and in CI; `make up` shows a healthy database.
-**Checkpoint:** why pin versions? What does a health check give you? What would break on a different machine?
+**Lesson:** `docs/learnings/phase1.md`
 
 ## Phase 2: Data prep with PySpark (8h)
 
@@ -55,7 +54,7 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 - [ ] Record row counts and runtime for the dev subset and the full run
 
 **Exit criteria:** reproducible Parquet from a single command; tests pass.
-**Checkpoint:** what does a Spark shuffle cost? Why dedupe before splitting? Why split by thread?
+**Lesson:** `docs/learnings/phase2.md`
 
 ## Phase 3: Labels and gold set (6h)
 
@@ -65,10 +64,10 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 - [ ] Define the label scheme (`public | internal | confidential`, plus PII flags)
 - [ ] Weak-label the email corpus with rules, then hand-check 200 items as the gold set
 - [ ] Freeze train, dev and test splits (by thread); commit split manifests, not data
-- [ ] Write down known label limits in `LEARNING.md`
+- [ ] Write down known label limits in `docs/learnings/phase3.md`
 
-**Exit criteria:** frozen gold set and split manifests; labelling notes written.
-**Checkpoint:** what is label noise and how does it inflate scores? Why precision and recall over accuracy here?
+**Exit criteria:** frozen gold set and split manifests; labelling notes in the lesson.
+**Lesson:** `docs/learnings/phase3.md`
 
 ## Phase 4: Embedding pipeline, text and image (10h)
 
@@ -83,7 +82,7 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 - [ ] Load embeddings into pgvector
 
 **Exit criteria:** resume test passes; all vectors finite; dev subset fully indexed.
-**Checkpoint:** why not float16? What is an embedding space? Why do prefixes matter?
+**Lesson:** `docs/learnings/phase4.md`
 
 ## Phase 5: Permission-aware retrieval (8h)
 
@@ -96,7 +95,7 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 - [ ] Text and image results in one ranked list
 
 **Exit criteria:** leak test shows zero violations.
-**Checkpoint:** why filter before ranking? What does approximate search trade away?
+**Lesson:** `docs/learnings/phase5.md`
 
 ## Phase 6: Retrieval benchmark (15h)
 
@@ -110,7 +109,7 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 - [ ] Results table, Pareto plot, "what I would ship" section
 
 **Exit criteria:** README-ready results with intervals and limits stated.
-**Checkpoint:** recall@k vs MRR vs nDCG; why does 128d hurt images more than text; what would change your recommendation at 100x scale?
+**Lesson:** `docs/learnings/phase6.md`
 
 ## Phase 7: Classifier comparison and calibration (16h)
 
@@ -125,7 +124,7 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 - [ ] 5 to 10 analysed errors
 
 **Exit criteria:** one comparison table and a short written conclusion.
-**Checkpoint:** what is data leakage; what does calibration mean; why F1 over accuracy on imbalanced labels?
+**Lesson:** `docs/learnings/phase7.md`
 
 ## Phase 8: Model service and C# gateway (10h)
 
@@ -137,7 +136,7 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 - [ ] xUnit tests for auth and ACL; API contract tests; compose-based end-to-end check
 
 **Exit criteria:** contract tests green; leak test passes through the API.
-**Checkpoint:** why keep permissions out of the model service? What happens if the model service is down?
+**Lesson:** `docs/learnings/phase8.md`
 
 ## Phase 9: Demo, deploy, README (8h)
 
@@ -150,6 +149,7 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 - [ ] Final fresh-clone test
 
 **Exit criteria:** acceptance criteria 1 to 5 and 7 from `spec.md` met.
+**Lesson:** `docs/learnings/phase9.md`
 
 ## Phase 10: Demo video (6h)
 
@@ -160,6 +160,7 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 - [ ] Export screenshots or GIF frames for the README
 
 **Exit criteria:** video embedded or linked in the README.
+**Lesson:** `docs/learnings/phase10.md`
 
 ## Phase 11 (stretch, after everything above): audio (16h)
 
@@ -169,6 +170,8 @@ Only start when phases 1 to 10 are done. Mention in the README only if built and
 - [ ] Audio encoder path and memory profile on the Mac
 - [ ] Spoken or text query to audio retrieval; ground truth from paired transcripts
 - [ ] Benchmark rows and a short write-up
+
+**Lesson:** `docs/learnings/phase11.md`
 
 ---
 
@@ -180,7 +183,7 @@ Only start when phases 1 to 10 are done. Mention in the README only if built and
 4. Answer-mode LLM, keeping fast mode only
 5. Public hosted demo, keeping a recorded demo and local instructions
 
-**Never cut:** the leak test, the frozen gold set, confidence intervals, the limitations section, `LEARNING.md`.
+**Never cut:** the leak test, the frozen gold set, confidence intervals, the limitations section, `docs/learnings/`.
 
 ## Definition of done
 

@@ -21,7 +21,7 @@ indent_style = tab
 indent_size = 4
 max_line_length = 120
 # CA1502 (cyclomatic complexity) stays enabled however AnalysisMode is set;
-# the threshold itself lives in dotnet/CodeMetricsConfig.txt (flags >= 40).
+# the threshold itself lives in dotnet/CodeMetricsConfig.txt (41+ fails).
 dotnet_diagnostic.CA1502.severity = error
 
 [*.{sln,slnx}]

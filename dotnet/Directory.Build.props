@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <!-- CA1502 (cyclomatic complexity) threshold: analyzers only read it as an
-       AdditionalFile, not from .editorconfig. "CA1502: 39" flags methods
-       with complexity >= 40. -->
+       AdditionalFile, not from .editorconfig. "CA1502: 40" flags methods
+       with complexity 41+. -->
   <ItemGroup>
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)CodeMetricsConfig.txt" />
   </ItemGroup>

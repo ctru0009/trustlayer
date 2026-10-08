@@ -12,7 +12,7 @@ is the model, and how much is the plumbing around it — access control, evaluat
 Phase 1 of 11. The repository builds, both test suites run, and Postgres with pgvector starts.
 
 There is no embedding, retrieval, classification or API code yet. I am adding those phase by phase
-and writing down what I actually understand in [`LEARNING.md`](LEARNING.md). The plan, with exit
+and writing down what I actually understand in [`docs/learnings/`](docs/learnings/phase1.md). The plan, with exit
 criteria per phase, is in [`docs/roadmap.md`](docs/roadmap.md); the design is in
 [`docs/spec.md`](docs/spec.md).
 

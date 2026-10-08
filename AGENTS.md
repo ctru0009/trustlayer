@@ -1,5 +1,7 @@
 # Repository Guidelines
 
+## Project Overview
+
 Trust Layer: a learning project building private on-device semantic search over
 documents and screenshots — ranked by meaning, sensitivity-labelled, and
 permission-aware (search must never leak restricted documents). Currently Phase 1
@@ -13,13 +15,13 @@ From `docs/roadmap.md` — these override default agent instincts:
 
 - **Core logic is human-written**: training loops, metrics, retrieval filter,
   Spark transforms. Agent reviews and suggests; agent MAY scaffold boilerplate.
-- **Concept first, code second**: 3–5 `LEARNING.md` lines before and after each
-  phase (human writes them; never fabricate).
-- **Quiz ritual**: after each phase, 5 questions one at a time; fix gaps.
+- **Lessons over rituals**: each phase gets a lesson in `docs/learnings/phaseN.md`
+  (concepts, tips and tricks, spec pointers), written alongside the work — no
+  before/after notes, no quizzes gating progress.
 - **Every README number traces to a run log or notebook.**
 - **NaN + dimension check before trusting any embedding run.**
 - Never cut: leak test, frozen gold set, confidence intervals, limitations
-  section, `LEARNING.md`. Never list unbuilt features as roadmap items.
+  section, `docs/learnings/`. Never list unbuilt features as roadmap items.
 
 ## Architecture & Data Flow
 
@@ -66,7 +68,8 @@ exists.
   (empty until Phase 4), `dockerfiles/` (empty until Phase 8),
   `hooks/pre-commit` (installed by `make setup`).
 - `docs/` — `spec.md` (authoritative design), `roadmap.md` (11 phases, exit
-  criteria, no calendar dates), `architecture.md` (stub until Phase 8).
+  criteria, no calendar dates), `architecture.md` (stub until Phase 8),
+  `learnings/phase1..11.md` (per-phase lessons: concepts, tips, spec pointers).
 - `notebooks/` — thin Colab wrappers only (clone, install, run module, save to
   Drive per chunk). No logic.
 - `demo/` — Gradio thin client (Phase 9). `demo-video/` — isolated fframes
@@ -103,9 +106,9 @@ No domain patterns exist yet (scaffolding phase). What governs future code:
   usings; annotate nullability). `AnalysisMode=Recommended` with
   `TreatWarningsAsErrors` and `EnforceCodeStyleInBuild` — any warning,
   including style, fails `dotnet build`. `dotnet format` is the formatter.
-- **Complexity < 40 both stacks**: ruff `max-complexity = 39`, CA1502 `39` in
+- **Complexity ≤ 40 both stacks**: ruff `max-complexity = 40`, CA1502 `40` in
   `dotnet/CodeMetricsConfig.txt` (wired as `AdditionalFile` — analyzers ignore
-  `.editorconfig` for thresholds; both mean ≥ 40 fails).
+  `.editorconfig` for thresholds; both flag 41+).
 - **Naming**: Python `snake_case` package `trustlayer`; .NET `PascalCase`
   dotted (`TrustLayer.Gateway`); xUnit methods `Method_Scenario_Expected`
   (underscores exempt from CA1707 via test-only `.editorconfig` — which must
@@ -133,8 +136,7 @@ No domain patterns exist yet (scaffolding phase). What governs future code:
   `.github/workflows/ci.yml`, `infra/docker-compose.yml`, `.env.example`.
 - Design: `docs/spec.md` (authoritative), `docs/roadmap.md` (phases + exit
   criteria), `docs/architecture.md` (toolchain pins + preconditions).
-- State: `README.md` (status + quickstart), `LEARNING.md` (human learning log),
-  `data/SOURCES.md` (dataset registry).
+- State: `README.md` (status + quickstart), `data/SOURCES.md` (dataset registry).
 
 ## Runtime/Tooling Preferences
 

@@ -108,7 +108,7 @@ Model: `google/embeddinggemma-2` (open, multimodal, 740M parameters in total: 27
 | ID | Requirement | Verified by |
 |---|---|---|
 | F1 | PySpark job cleans, dedupes and chunks the corpus into Parquet | Row counts and dedup stats logged; unit tests on transforms |
-| F2 | Documents carry sensitivity labels; 200 hand-checked items form a frozen gold test set | Gold file committed (fixtures only), labelling notes in `LEARNING.md` |
+| F2 | Documents carry sensitivity labels; 200 hand-checked items form a frozen gold test set | Gold file committed (fixtures only), labelling notes in `docs/learnings/phase3.md` |
 | F3 | Embedding pipeline is resumable, chunked, prefix-correct, normalised and finite-checked | Kill-and-resume test; NaN test |
 | F4 | pgvector stores chunk vectors with ACL and label columns | Schema migration tests |
 | F5 | `/ask` offers **fast mode** (cited passages only) and **answer mode** (LLM answer from permitted passages only) | API tests; latency recorded for both |
@@ -254,7 +254,7 @@ Change one thing per row:
 2. All stored embeddings are finite with the expected dimension.
 3. README contains the results table, Pareto plot, and "what I would ship" section.
 4. A limitations section is present.
-5. `LEARNING.md` has own-words notes for every phase.
+5. `docs/learnings/` has a lesson for every phase.
 6. A demo video of 90 seconds or less plus screenshots or GIF frames show: ask, classify, and a permission block.
 7. A fresh clone can reproduce the small-fixture pipeline using documented commands.
 
@@ -263,8 +263,7 @@ Change one thing per row:
 ```
 trust-layer/
   README.md
-  LEARNING.md
-  docs/ spec.md roadmap.md architecture.md
+  docs/ spec.md roadmap.md architecture.md learnings/phase1..11.md
   data/ SOURCES.md scripts/ (downloads only; data itself is git-ignored)
   python/
     pyproject.toml
