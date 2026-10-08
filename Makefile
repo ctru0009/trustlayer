@@ -7,7 +7,7 @@
 
 COMPOSE := docker compose --project-directory . -f infra/docker-compose.yml
 
-.PHONY: setup test lint up down prep labels embed embed-images seed-acls leak
+.PHONY: setup test lint up down prep labels embed embed-images seed-acls leak bench-freeze bench
 
 # Install both stacks' dependencies and the pre-commit hook.
 # This installs the base Python env (no PySpark); `make test` and `make prep`
@@ -67,3 +67,11 @@ seed-acls:
 # Needs DATABASE_URL; CPU encode of ~1.7k queries takes a few minutes.
 leak:
 	cd python && UV_LINK_MODE=copy uv run --extra embed python -m trustlayer.retrieve.leak
+
+# Phase 6: freeze query sets, then run the benchmark sweep.
+# Both need DATABASE_URL; bench needs the embed extra (CPU query encode).
+bench-freeze:
+	cd python && UV_LINK_MODE=copy uv run --extra embed python -m trustlayer.bench.freeze
+
+bench:
+	cd python && UV_LINK_MODE=copy uv run --extra embed python -m trustlayer.bench.harness

@@ -9,12 +9,41 @@ is the model, and how much is the plumbing around it — access control, evaluat
 
 ## Status
 
-Phase 1 of 11. The repository builds, both test suites run, and Postgres with pgvector starts.
+Phase 6 of 11. The pipeline runs end to end: PySpark prep → weak labels →
+EmbeddingGemma-2 embeddings (23k text + 50 image vectors in pgvector) →
+permission-filtered search with a zero-violation leak test (0/69,160) →
+audited retrieval benchmark below. No classification, API, or demo code yet.
 
-There is no embedding, retrieval, classification or API code yet. I am adding those phase by phase
-and writing down what I actually understand in [`docs/learnings/`](docs/learnings/phase1.md). The plan, with exit
-criteria per phase, is in [`docs/roadmap.md`](docs/roadmap.md); the design is in
-[`docs/spec.md`](docs/spec.md).
+The plan, with exit criteria per phase, is in [`docs/roadmap.md`](docs/roadmap.md);
+the design is in [`docs/spec.md`](docs/spec.md); per-phase lessons (what I actually
+understood) are in [`docs/learnings/`](docs/learnings/phase1.md).
+
+## Retrieval results (Phase 6)
+
+300 frozen queries (150 subjects + 150 held-out chunks, test split) against
+23,317 chunks. Recall@10 / MRR@10, bootstrap 95% CIs, CPU latencies. Full
+provenance per run in `data/bench/results/`; method in
+[`docs/learnings/phase6.md`](docs/learnings/phase6.md).
+
+| Config | R@10 | MRR | p50 | Index |
+|---|---|---|---|---|
+| baseline (768d fp32, exact) | 0.977 | 0.911 | 31ms | 100MB |
+| O1 512d | 0.977 | 0.911 | 29ms | 69MB |
+| O2 256d | 0.973 | 0.895 | 5.5ms | 29MB |
+| O3 128d | 0.940 | 0.860 | 4.4ms | 16MB |
+| O5 HNSW | 0.977 | 0.911 | 34ms | 193MB |
+| O6 halfvec | 0.977 | 0.911 | 7.5ms | 40MB |
+| **O7 256d + halfvec (ship this)** | **0.970** | **0.894** | **4.5ms** | **16MB** |
+| no-prefix ablation | 0.963 | 0.886 | 36ms | 100MB |
+
+Cross-lingual (500-article Vietnamese Wikipedia sample): EN→VI MRR 0.954,
+VI→VI MRR 0.985 — same recall, slightly worse cross-lingual ranking.
+
+![quality vs index size](docs/bench-pareto.png)
+
+Limits: single-relevant judgments (recall = hit@10); chunk queries favour
+easy docs; 23k-row latency doesn't predict scale. O4 (GGUF) blocked:
+released llama.cpp can't load this model's architecture yet.
 
 ## Getting started
 

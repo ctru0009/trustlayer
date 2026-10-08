@@ -106,15 +106,14 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 
 **Goal:** an auditable quality, memory and speed table.
 
-- [ ] Build and freeze the query set; hand-check at least 100 queries
-- [ ] Benchmark harness: recall@10, MRR@10, nDCG@10, latency, memory, index size
-- [ ] Baseline plus O1 to O7 and the silent-failure ablations
-- [ ] Cross-lingual rows (Vietnamese and English)
-- [ ] Bootstrap confidence intervals; config logged per run
-- [ ] Results table, Pareto plot, "what I would ship" section
+- [x] Build and freeze the query set; hand-check at least 100 queries (300 frozen, sha `65390815`; 100 reviewed, 1 weak-but-valid)
+- [x] Benchmark harness: recall@10, MRR@10, nDCG@10, latency, memory, index size (5 repeats, bootstrap CIs, config per run)
+- [x] Baseline plus O1 to O7 and the silent-failure ablations (O4 blocked: llama.cpp lacks the arch — recorded)
+- [x] Cross-lingual rows (Vietnamese and English) (EN→VI MRR 0.954 vs VI→VI 0.985; VI→EN needs parallel corpus — recorded)
+- [x] Bootstrap confidence intervals; config logged per run
+- [x] Results table, Pareto plot, "what I would ship" section (O7: README + lesson)
 
-**Exit criteria:** README-ready results with intervals and limits stated.
-**Lesson:** `docs/learnings/phase6.md`
+**Exit criteria:** README-ready results with intervals and limits stated (done — table, plot, limits).
 
 ## Phase 7: Classifier comparison and calibration (16h)
 
