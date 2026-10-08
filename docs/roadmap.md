@@ -38,6 +38,8 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 - [x] GitHub Actions: build and test both stacks
 - [x] `data/SOURCES.md` stub and `docs/learnings/` lesson convention
 - [x] Verify Java version compatible with the pinned PySpark
+- [x] Strict linting: ruff rules + format, .NET Recommended analyzers as errors, complexity ≤ 40 both stacks, pre-commit hook
+- [x] `AGENTS.md` repository guidelines
 
 **Exit criteria:** `make setup && make test` green locally and in CI; `make up` shows a healthy database.
 **Lesson:** `docs/learnings/phase1.md`
@@ -74,6 +76,7 @@ Phases are ordered so that something is always demoable. Hours are my own estima
 **Goal:** resumable embedding of text and images with correct model usage.
 
 - [ ] Load text-only encoder; verify `mps` output against a CPU float32 reference
+- [ ] Pin model revision (commit hash) and record it in the lesson
 - [ ] Prefix handling (`SearchQuery`, `Document`, `Classification`), normalisation, dimension handling
 - [ ] Finite and dimension checks per batch; chunked output; resume after interruption
 - [ ] Text+image encoder path; image subset embedded
